@@ -1,0 +1,26 @@
+%transi-sec05 {
+  transition: all 0.5s ease;
+}
+.left-panel {
+  @extend %child-panel;
+  @extend %transi-sec05;
+}
+%child-panel {
+  height: 80%;
+}
+.full-panel {
+  height: 100%;
+  @extend %transi-sec05;
+}
+.operation-panel {
+  height: 1rem;
+  &:hover {
+    height: 5rem;
+  }
+}
+
+.normal-panel {
+  margin-top: 1rem;
+  font-size: 1.6rem;
+  color: $--color-warning;
+}

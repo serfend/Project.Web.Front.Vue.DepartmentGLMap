@@ -1,0 +1,70 @@
+<template>
+  <el-footer height="2rem" class="footer" :style="{opacity:show?1:0,position:show?'absolute':''}">
+    <el-popover placement="top" trigger="hover" @show="contactMeHasShow = true">
+      <ContactMe v-if="contactMeHasShow" content="https://u.wechat.com/MD9-GPLsGevTaLJPC7QG2yI" />
+      <el-link slot="reference" type="primary">联系我们</el-link>
+    </el-popover>
+    <el-popover placement="top" trigger="hover" @show="helpMeHasShow = true">
+      <ContactMe
+        v-if="helpMeHasShow"
+        content="https://www.baidu.com"
+        description="扫码反馈意见/问题"
+      />
+      <el-link slot="reference" type="primary" href="https://www.baidu.com">意见反馈</el-link>
+    </el-popover>
+    <el-popover placement="top" trigger="hover" @show="policyHasShow = true">
+      <ContactMe
+        v-if="policyHasShow"
+        content="https://www.baidu.com"
+        description="扫码查看相关论文及参考"
+      />
+      <el-link slot="reference" type="primary" href="https://www.baidu.com">参考文献</el-link>
+    </el-popover>
+    <div style="float:right;color:#bbb">
+      <span>©2020 sf</span>
+      <span>{{ $store.state.settings.title }}</span>
+      <el-popover trigger="hover">
+        <p>{{ $store.state.settings.notice }}</p>
+        <el-link slot="reference" href="#/about/version">{{ $store.state.settings.version }}</el-link>
+      </el-popover>
+    </div>
+  </el-footer>
+</template>
+
+<script>
+import ContactMe from '@/components/ContactMe'
+
+export default {
+  name: 'Footer',
+  components: { ContactMe },
+  props: {
+    show: { type: Boolean, default: true },
+  },
+  data: () => ({
+    contactMeHasShow: false,
+    helpMeHasShow: false,
+    policyHasShow: false,
+  }),
+}
+</script>
+<style lang="scss" scoped>
+.footer {
+  // position: absolute;
+  width: 100%;
+  left: 0;
+  bottom: 0;
+  transition: all 0.5s;
+  background: #f5f6f53f;
+  border-top: 0.1rem solid #ebebeb9f;
+  line-height: 1.5rem;
+  font-size: 1rem;
+  .el-link {
+    font-size: 1rem;
+    margin-left: 1rem;
+  }
+}
+.footer:hover {
+  background: #f5f6f5;
+  border-top: 0.1rem solid #ebebeb;
+}
+</style>

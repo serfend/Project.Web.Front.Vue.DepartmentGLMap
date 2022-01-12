@@ -1,0 +1,9 @@
+@import "~@/styles/element-variables.scss";
+@import "./panel.scss";
+@import "./form.scss";
+.frame-container {
+  margin: 2rem;
+  color: $--color-primary-light;
+  height: 100%;
+  color: rgb(255, 123, 0);
+}

@@ -1,0 +1,17 @@
+%normal-letter {
+  letter-spacing: normal;
+  text-align: left;
+}
+.normal-text {
+  @extend %normal-letter;
+}
+.normal-form {
+  padding-top: 1rem;
+  @extend %normal-letter;
+  .el-form-item {
+    margin-top: 1rem !important;
+  }
+}
+.on-left {
+  float: left;
+}

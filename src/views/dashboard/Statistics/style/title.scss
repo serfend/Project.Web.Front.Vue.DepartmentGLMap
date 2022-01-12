@@ -1,0 +1,56 @@
+// .statistics-title {
+//   margin: 2rem 0 0 2rem;
+//   .content {
+//     font-size: 50px;
+//     color: #fff;
+//     text-shadow: 0 0 10px rgb(0, 183, 255);
+//     font-family: "Sacramento", cursive;
+//   }
+// }
+
+.statistics-title {
+  position: relative;
+  height: 5.5rem;
+  background: url(~@/assets/dashboard/images/head_bg.png) no-repeat;
+  background-size: 100% 100%;
+}
+.statistics-title h1 {
+  font-size: 3.75rem;
+  font-family: "Sacramento", cursive;
+  text-shadow: 0 0 0.2rem rgb(0, 183, 255);
+  color: #fff;
+  text-align: center;
+}
+.dv-border-box-11-title {
+  font-family: "Sacramento", cursive;
+  font-size: 1.5rem;
+}
+%statistics-title-panel {
+  @extend %statistics-title-panel-span;
+  position: absolute;
+  top: 0;
+  line-height: 3rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.5rem;
+  font-family: "electronicFont";
+}
+
+%statistics-title-panel-span {
+  .display-title {
+    color: #fff;
+    font-weight: 600;
+  }
+  .time {
+    color: #ff0;
+    text-shadow: rgba(255, 255, 255, 0.2);
+    font-weight: 600;
+  }
+}
+.statistics-title .right-panel {
+  @extend %statistics-title-panel;
+  right: 3.75rem;
+}
+.statistics-title .left-panel {
+  @extend %statistics-title-panel;
+  left: 3.75rem;
+}
