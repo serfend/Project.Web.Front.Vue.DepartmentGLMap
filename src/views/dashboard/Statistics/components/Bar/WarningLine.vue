@@ -7,9 +7,9 @@
 </template>
 
 <script>
-import echarts from 'echarts'
+import * as echarts from 'echarts'
 import { createLinerSeries } from '../../js/linerGradient'
-import { parseTimeFull } from '@/utils'
+import { parseTime } from '@/utils'
 export default {
   name: 'VacationStatisticsLine',
   props: {
@@ -71,7 +71,7 @@ export default {
     push_data(index, value, time) {
       if (index > this.series.length) return
       time = time || new Date()
-      time = parseTimeFull(time, '{y}/{m}/{d} {h}:{i}:{s}.{l}')
+      time = parseTime(time, '{y}/{m}/{d} {h}:{i}:{s}.{l}')
       const s = this.series[index]
       if (!s) {
         console.log('not register ', index)

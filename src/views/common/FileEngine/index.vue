@@ -138,7 +138,7 @@ export default {
     },
   },
   mounted() {
-    this.uploadurl = process.env.VUE_APP_BASE_API + '/file/upload'
+    this.uploadurl = process.env.VUE_APP_BASEURL + '/file/upload'
     this.refreshStatus()
   },
   methods: {
@@ -151,7 +151,7 @@ export default {
       })
     },
     downloadUrl(fileId) {
-      return `${process.env.VUE_APP_BASE_API}/file/download?fileid=${fileId}`
+      return `${process.env.VUE_APP_BASEURL}/file/download?fileid=${fileId}`
     },
     clipBoard(fileid, fileName, event) {
       clipboard(this.downloadUrl(fileid), event).then(() => {

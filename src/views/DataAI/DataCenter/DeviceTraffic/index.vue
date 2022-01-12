@@ -3,9 +3,9 @@
 </template>
 
 <script>
-import echarts from 'echarts'
+import * as echarts from 'echarts'
 import { createLinerSeries } from '@/views/dashboard/Statistics/js/linerGradient'
-import { parseTimeFull } from '@/utils'
+import { parseTime } from '@/utils'
 import { formatSciItem } from '@/utils/math'
 import { get_device_detail } from '@/api/devices'
 import { debounce } from '@/utils'
@@ -70,7 +70,7 @@ export default {
         for (let i = 0; i < this.runtime.length; i++) {
           const curValue = data.traffic[i]
           const total = formatSciItem(Math.floor(curValue.current))
-          const cDate = parseTimeFull(date)
+          const cDate = parseTime(date)
           this.series[i].data.push([cDate, curValue.current, `${Math.floor(total.value * 100) / 100}${total.suffix}`])
           if (i === 0) {
             this.dates.push(cDate)

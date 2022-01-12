@@ -1,5 +1,5 @@
 // cover some element-ui styles
-@import "@/styles/element-variables";
+
 .el-breadcrumb__inner,
 .el-breadcrumb__inner a {
   font-weight: 400 !important;
@@ -69,33 +69,11 @@
 // dropdown
 .el-dropdown-menu {
   a {
-    display: block;
+    display: block
   }
 }
 
 // fix date-picker ui bug in filter-item
 .el-range-editor.el-input__inner {
   display: inline-flex !important;
-}
-// // use dark model
-// .el-card.is-always-shadow {
-//   box-shadow: 0 2px 12px 0 rgb(20, 181, 255);
-// }
-// .el-card__body {
-//   background-color: rgb(28, 28, 168);
-// }
-// .el-card {
-//   opacity: 1!important;
-// }
-.el-form-item {
-  margin-bottom: 0.3rem !important;
-}
-.el-divider--horizontal {
-  margin: 0.5rem !important;
-}
-.el-select-dropdown__item {
-  background-color: $--color-background-darker;
-}
-.el-table--medium td {
-  padding: 0.1rem;
 }

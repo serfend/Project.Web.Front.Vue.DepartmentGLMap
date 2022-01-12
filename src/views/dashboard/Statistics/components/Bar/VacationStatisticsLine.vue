@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import echarts from 'echarts'
+import * as echarts from 'echarts'
 import { createLinerSeries } from '../../js/linerGradient'
 import { groupByPredict } from '@/utils/data-handle'
 import { debounce } from '@/utils'

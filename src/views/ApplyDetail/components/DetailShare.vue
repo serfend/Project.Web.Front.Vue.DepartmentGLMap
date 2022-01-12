@@ -59,7 +59,7 @@ export default {
       return `${current_origin}/#/vacation/applyDetail?id=${this.id}`
     },
     short_url() {
-      return `${process.env.VUE_APP_BASE_API}/s/${this.urlKey}`
+      return `${process.env.VUE_APP_BASEURL}/s/${this.urlKey}`
     },
   },
   watch: {

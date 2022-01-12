@@ -102,7 +102,7 @@ export default {
   },
   computed: {
     baseUrl() {
-      return process.env.VUE_APP_BASE_API
+      return process.env.VUE_APP_BASEURL
     }
   },
   watch: {

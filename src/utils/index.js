@@ -1,6 +1,10 @@
-/**
- * Created by jiachenpan on 16/11/18.
- */
+export function getTimeDesc(seconds) {
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const s = Math.floor(seconds % 60)
+  const left_desc = `${h}h${m}m${s}s`
+  return left_desc
+}
 
 export const getDateDelta = (s, e) => {
   const yearDelta = e.getFullYear() - s.getFullYear()
@@ -32,7 +36,7 @@ const DateIntervalOption = {
   },
   hour: (s, e) => getTimeDelta(s, e, 3600000),
   minute: (s, e) => getTimeDelta(s, e, 60000),
-  second: (s, e) => getTimeDelta(s, e, 1)
+  second: (s, e) => getTimeDelta(s, e, 1000)
 }
 /**
  *比较两个日期之间相差的天数
@@ -53,9 +57,23 @@ export function datedifference(end, start, interval = 'day') {
   if (!fn) return -1
   return fn(start, end)
 }
-export function parseTimeFull(time, cFormat) {
-  const format = cFormat || '{y}-{m}-{d} {h}:{i}:{s}.{l}'
-  return parseTime(time, format)
+
+export function relativeDate(d, compareTo) {
+  d = new Date(d)
+  let now = compareTo || new Date()
+  now = new Date(now)
+  const nowY = now.getFullYear()
+  const dY = d.getFullYear()
+  const nowM = now.getMonth() + 1
+  const dM = d.getMonth() + 1
+  const nowD = now.getDate()
+  const dD = d.getDate()
+  const sameYear = nowY === dY ? '' : `${dY}年`
+  const same = !sameYear && nowM === dM
+  const sameMonth = same ? '' : `${dM}月`
+  const sameDay = (!sameMonth && nowD === dD) ? '' : `${dD}日`
+  const result = `${sameYear}${sameMonth}${sameDay}`
+  return result || compareTo || '今天'
 }
 /**
  * Parse the time to string
@@ -78,24 +96,15 @@ export function parseTime(time, cFormat) {
     h: date.getHours(),
     i: date.getMinutes(),
     s: date.getSeconds(),
-    a: date.getDay(),
-    l: date.getMilliseconds()
+    a: date.getDay()
   }
-  const time_str = format.replace(/{(y|m|d|h|i|s|a|l)+}/g, (result, key) => {
+  const time_str = format.replace(/{(y|m|d|h|i|s|a)+}/g, (result, key) => {
     let value = formatObj[key]
     // Note: getDay() returns 0 on Sunday
     if (key === 'a') {
       return ['日', '一', '二', '三', '四', '五', '六'][value]
     }
-    if (key === 'l') {
-      if (result.length > 0) {
-        if (value < 10) {
-          value = '00' + value
-        } else if (value < 100) {
-          value = '0' + value
-        }
-      }
-    } else if (result.length > 0 && value < 10) {
+    if (result.length > 0 && value < 10) {
       value = '0' + value
     }
     return value || 0
@@ -126,9 +135,10 @@ export function toDate(time) {
 /**
  * @param {number} time
  * @param {string} option
+ * @param {Boolean} show_time 是否显示时分
  * @returns {string}
  */
-export function formatTime(time, option) {
+export function formatTime(time, option, show_time) {
   time = toDate(time)
   const d = new Date(time)
   const now = Date.now()
@@ -137,19 +147,27 @@ export function formatTime(time, option) {
   const isFuture = diff < 0
   const append = isFuture ? '后' : '前'
   diff = Math.abs(diff)
+  let result
   if (!isFuture && diff < 60) {
     return `${Math.floor(diff)}秒${append}`
   } else if (diff < 3600) {
     return `${Math.floor(diff / 60)}分钟${append}`
   } else if (diff < 3600 * 24) {
     return `${Math.floor(diff / 3600)}小时${append}`
-  } else if (diff < 3600 * 24 * 90) {
+  } else if (diff < 3600 * 24 * 7) {
     const day_diff = Math.abs(datedifference(now, d))
     if (day_diff === 1) {
-      return isFuture ? '明天' : '昨天'
+      result = isFuture ? '明天' : '昨天'
     } else if (day_diff === 2) {
-      return isFuture ? '后天' : '前天'
-    } else return `${day_diff}天${append}`
+      result = isFuture ? '后天' : '前天'
+    } else {
+      result = `${day_diff}天${append}`
+    }
+    if (result && show_time) {
+      const m = time.getMinutes() || '整'
+      result = `${result}${time.getHours()}点${m}`
+    }
+    return result
   }
   return parseTime(time, option)
 }

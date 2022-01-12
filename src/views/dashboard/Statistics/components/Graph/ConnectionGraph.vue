@@ -31,7 +31,7 @@
 
 <script>
 import chart from './chart'
-import echarts from 'echarts'
+import * as echarts from 'echarts'
 import 'echarts-gl'
 import { formatSciItem } from '@/utils/math'
 const const_array = new Array(11).fill(1)
