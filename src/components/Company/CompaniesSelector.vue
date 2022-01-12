@@ -2,9 +2,10 @@
   <CascaderSelector
     ref="companyInnerSelector"
     v-model="companySelectItem"
+    :default-select-first="defaultSelectFirst"
     :child-getter-method="companyChild"
     :multiple="true"
-    :placeholder="placeholder.map(i=>i.name).join(' ')"
+    :placeholder="placeholder"
   />
 </template>
 
@@ -20,6 +21,10 @@ export default {
     event: 'change'
   },
   props: {
+    defaultSelectFirst: {
+      type: Boolean,
+      default: false
+    },
     companies: {
       type: Array,
       default: null
@@ -27,7 +32,7 @@ export default {
   },
   data: () => ({
     companySelectItem: null,
-    showPlaceholder: []
+    showPlaceholder: '未选择'
   }),
   computed: {
     requireCheckName() {
@@ -36,7 +41,12 @@ export default {
       }, 500)
     },
     placeholder() {
-      const cn = this.companies
+      const cn =
+        this.companies &&
+        this.companies
+          .filter(i => i)
+          .map(i => i.name)
+          .join(',')
       return cn || this.showPlaceholder
     }
   },

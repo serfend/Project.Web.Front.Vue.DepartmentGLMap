@@ -1,11 +1,16 @@
 <template>
-  <div>
+  <div v-loading="loading">
     <User v-if="directShowCard" :data="innerData" :can-load-avatar="true" />
     <el-popover v-else :placement="placement" width="200" trigger="hover" @show="isActive=true">
-      <User :data="innerData" :can-load-avatar="isActive" />
-      <el-tag v-show="innerData.realName" slot="reference" class="user-item" v-bind="$attrs">
+      <User v-if="isActive" :data="innerData" :can-load-avatar="isActive" />
+      <el-tag slot="reference" class="user-item" v-bind="$attrs">
         <i class="el-icon-user-solid" />
-        {{ innerData.realName }}
+        <span v-if="innerData">{{ innerData.realName }}</span>
+        <span v-else>
+          <el-tooltip :content="errorMsg">
+            <span>{{ userid }}无效</span>
+          </el-tooltip>
+        </span>
       </el-tag>
     </el-popover>
   </div>
@@ -20,11 +25,9 @@ export default {
   props: {
     data: {
       type: Object,
-      default() {
-        return {
-          realName: null
-        }
-      }
+      default: () => ({
+        realName: null
+      })
     },
     userid: {
       type: String,
@@ -39,14 +42,15 @@ export default {
       default: false
     }
   },
-  data() {
-    return {
-      isActive: false,
-      innerData: {
-        realName: 'null'
-      }
-    }
-  },
+  data: () => ({
+    isActive: false,
+    innerData: {
+      realName: 'null'
+    },
+    lastUserId: null,
+    loading: false,
+    errorMsg: null
+  }),
   watch: {
     data: {
       handler(val) {
@@ -58,9 +62,7 @@ export default {
     },
     userid: {
       handler(val) {
-        if (val) {
-          this.loadUser(val)
-        }
+        this.loadUser(val)
       },
       immediate: true
     }
@@ -69,11 +71,22 @@ export default {
   methods: {
     loadUser(userid) {
       if (!userid) {
+        if (this.lastUserId) this.innerData = null
         return
       }
-      getUserSummary(userid, true).then(data => {
-        this.innerData = data
-      })
+      this.loading = true
+      this.lastUserId = userid
+      getUserSummary(userid, true)
+        .then(data => {
+          this.innerData = data
+        })
+        .catch(e => {
+          this.innerData = null
+          this.errorMsg = e.message
+        })
+        .finally(() => {
+          this.loading = false
+        })
     }
   }
 }

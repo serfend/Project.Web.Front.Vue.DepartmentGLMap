@@ -1,24 +1,27 @@
 <template>
-  <div>
+  <ApplyAuditStreamPreviewInner
+    v-if="showDetail"
+    :userid="userid"
+    :audit-status="auditStatus"
+    :now-step="nowStep"
+    :entity-type="entityType"
+    :entity-type-desc="entityTypeDesc"
+    :solution-name.sync="solutionName"
+  />
+  <el-popover v-else trigger="hover" @show="userHasHover=true">
     <ApplyAuditStreamPreviewInner
-      v-if="showDetail"
+      v-if="userHasHover"
       :userid="userid"
       :audit-status="auditStatus"
       :now-step="nowStep"
+      :entity-type="entityType"
+      :entity-type-desc="entityTypeDesc"
       :solution-name.sync="solutionName"
+      :title="title"
     />
-    <el-popover v-else trigger="click" @show="userHasHover=true">
-      <ApplyAuditStreamPreviewInner
-        v-if="userHasHover"
-        :userid="userid"
-        :audit-status="auditStatus"
-        :now-step="nowStep"
-        :solution-name.sync="solutionName"
-      />
-      <span v-if="!$slots.content" slot="reference" class="preview-btn">{{ title }}</span>
-      <slot v-else slot="reference" name="content" />
-    </el-popover>
-  </div>
+    <span v-if="!$slots.content" slot="reference" class="preview-btn">{{ title }}</span>
+    <slot v-else slot="reference" style="display:flex" name="content" />
+  </el-popover>
 </template>
 
 <script>
@@ -27,48 +30,40 @@ export default {
   name: 'ApplyAuditStreamPreview',
   components: { ApplyAuditStreamPreviewInner },
   props: {
-    userid: {
-      type: String,
-      default: null,
-    },
-    auditStatus: {
-      type: Array,
-      default: null,
-    },
-    showDetail: {
-      type: Boolean,
-      default: false,
-    },
-    nowStep: {
-      type: Number,
-      default: -1,
-    },
-    title: {
-      type: String,
-      default: null,
-    },
+    userid: { type: String, default: null },
+    auditStatus: { type: Array, default: null },
+    showDetail: { type: Boolean, default: false },
+    nowStep: { type: Number, default: -1 },
+    title: { type: String, default: null },
+    entityType: { type: String, default: 'vacation' },
+    entityTypeDesc: { type: String, default: null }
   },
   data: () => ({
     solutionName: null,
-    userHasHover: false,
+    userHasHover: false
   }),
   watch: {
     solutionName: {
       handler(val) {
         this.$emit('update:solutionName', val)
       },
-      immediate: true,
-    },
-  },
+      immediate: true
+    }
+  }
 }
 </script>
 
 <style lang="scss" scoped>
+@import '@/styles/element-variables';
 .preview-btn {
-  transition: all 0.5s;
+  text-decoration: underline;
+  transition: all 0.2s ease;
   cursor: pointer;
+  font-size: 1rem;
   &:hover {
-    color: #00f;
+    text-decoration: none;
+    color: $--color-primary;
+    opacity: 0.8;
   }
 }
 </style>

@@ -1,6 +1,7 @@
 <template>
   <el-select
     v-model="iTag"
+    v-loading="loading"
     :remote-method="tagFilter"
     filterable
     clearable
@@ -23,14 +24,12 @@ export default {
     event: 'change'
   },
   props: {
-    tag: {
-      type: String,
-      default: null
-    }
+    tag: { type: String, default: null }
   },
   data: () => ({
     iTag: null,
-    tags: []
+    tags: [],
+    loading: false
   }),
   watch: {
     tag: {
@@ -49,9 +48,14 @@ export default {
       this.$emit('change', val)
     },
     tagFilter(val) {
-      companyTag(val).then(d => {
-        this.tags = d.list
-      })
+      this.loading = true
+      companyTag(val)
+        .then(d => {
+          this.tags = d.list
+        })
+        .finally(() => {
+          this.loading = false
+        })
     }
   }
 }

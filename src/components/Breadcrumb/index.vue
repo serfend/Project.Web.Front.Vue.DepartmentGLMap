@@ -5,15 +5,15 @@
         <span
           v-if="item.redirect==='noRedirect'||index==levelList.length-1"
           class="no-redirect"
-        >{{ generateTitle(item.meta.title) }}</span>
-        <a v-else @click.prevent="handleLink(item)">{{ generateTitle(item.meta.title) }}</a>
+        >{{ item.meta.ctitle||generateTitle(item.meta) }}</span>
+        <a v-else @click.prevent="handleLink(item)">{{ generateTitle(item.meta) }}</a>
       </el-breadcrumb-item>
     </transition-group>
   </el-breadcrumb>
 </template>
 
 <script>
-import { generateTitle } from '@/utils/i18n'
+import { generateTitle } from '@/utils/get-page-title'
 
 export default {
   data() {
@@ -34,7 +34,7 @@ export default {
     getBreadcrumb() {
       // only show routes with meta.title
       var matched = this.$route.matched.filter(
-        item => item.meta && item.meta.title
+        item => item.meta && (item.meta.title || item.meta.ctitle)
       )
       // it seems not wise to push dashboard on the first
       // const first = matched[0]
@@ -49,7 +49,10 @@ export default {
       // }
 
       this.levelList = matched.filter(
-        item => item.meta && item.meta.title && item.meta.breadcrumb !== false
+        item =>
+          item.meta &&
+          (item.meta.title || item.meta.ctitle) &&
+          item.meta.breadcrumb !== false
       )
     },
     isDashboard(route) {
@@ -60,6 +63,7 @@ export default {
       return name.trim().toLocaleLowerCase() === 'Dashboard'.toLocaleLowerCase()
     },
     handleLink(item) {
+      console.log(item)
       const { redirect, path } = item
       if (redirect) {
         this.$router.push(redirect)

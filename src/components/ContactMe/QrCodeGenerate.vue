@@ -77,7 +77,7 @@ export default {
         this.pixel
       )
         .then((data) => {
-          const t = fileToBase64(data)
+          var t = fileToBase64(data)
           t.then((url) => {
             self.qrCodeUrl = url
           })

@@ -1,5 +1,6 @@
 <template>
   <div>
+    <el-switch v-model="asManage" active-text="按编制单位" inactive-text="按管理单位" />
     <CompanySelector v-model="company" placeholder="选择单位" />
     <el-collapse
       v-model="nowCollapseSelectUserId"
@@ -13,7 +14,15 @@
         </template>
         <User :data="u" :can-load-avatar="u.canLoadAvatar" />
       </el-collapse-item>
-      <el-button v-show="hasNextPage" v-loading="loading" style="width:100%" @click="nextPage">下一页</el-button>
+      <el-button
+        v-if="company && company.code && hasNextPage"
+        v-infinite-scroll="nextPage"
+        v-loading="loading"
+        type="text"
+        style="width:100%"
+        @click="nextPage"
+      >{{ loading?'加载中...':'点击加载更多记录' }}</el-button>
+      <div v-else style="height:1px;background-color:#dcdfe6;margin:0.5rem 0.2rem" />
     </el-collapse>
   </div>
 </template>
@@ -26,39 +35,41 @@ import { getMembers } from '@/api/company'
 export default {
   name: 'FindUserByCompany',
   components: { CompanySelector, User },
-  data() {
-    return {
-      loading: false,
-      company: null,
-      usersByCompany: [],
-      hasNextPage: false,
-      pages: {
-        pageIndex: 0,
-        pageSize: 20
-      },
-      nowCollapseSelectUserId: ''
-    }
-  },
+  data: () => ({
+    loading: false,
+    company: null,
+    asManage: false,
+    usersByCompany: [],
+    hasNextPage: true,
+    pages: {
+      pageIndex: 0,
+      pageSize: 20
+    },
+    nowCollapseSelectUserId: ''
+  }),
   watch: {
     company: {
       handler(val) {
-        if (val) {
-          this.pages.pageIndex = -1
-          this.usersByCompany = []
-          this.$nextTick(() => {
-            this.nextPage()
-          })
-        }
+        if (!val) return
+        this.pages.pageIndex = -1
+        this.usersByCompany = []
+        this.hasNextPage = true
+        this.$nextTick(() => {
+          this.nextPage()
+        })
       },
       immediate: true
     }
   },
   methods: {
     nextPage() {
-      this.loading = true
+      const code = this.company && this.company.code
+      const { asManage } = this
+      if (this.loading || !code || !this.hasNextPage) return
+      const item = { code, asManage }
       this.pages.pageIndex++
-      const item = { code: this.company.code }
       const query = Object.assign(this.pages, item)
+      this.loading = true
       getMembers(query)
         .then(data => {
           const list = data.list.map(li => {
@@ -74,7 +85,7 @@ export default {
     },
     mapUser(li) {
       return {
-        description: li.companyName + li.dutiesName,
+        description: `${li.companyName}${li.dutiesName}`,
         id: li.id,
         value: li.id,
         realName: li.realName,

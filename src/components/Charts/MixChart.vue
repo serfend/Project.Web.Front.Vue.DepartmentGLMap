@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import echarts from 'echarts'
+import * as echarts from 'echarts'
 import resize from './mixins/resize'
 
 export default {
@@ -205,7 +205,7 @@ export default {
           itemStyle: {
             normal: {
               color: 'rgba(0,191,183,1)',
-              barBorderRadius: 0,
+              borderRadius: 0,
               label: {
                 show: true,
                 position: 'top',
@@ -238,7 +238,7 @@ export default {
           itemStyle: {
             normal: {
               color: 'rgba(252,230,48,1)',
-              barBorderRadius: 0,
+              borderRadius: 0,
               label: {
                 show: true,
                 position: 'top',

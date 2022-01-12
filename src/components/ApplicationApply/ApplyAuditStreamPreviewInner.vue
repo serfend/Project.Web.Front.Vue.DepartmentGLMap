@@ -1,5 +1,5 @@
 <template>
-  <div v-loading="!solutionName">
+  <div v-loading="!solutionName||loading">
     <div v-if="solutionName">
       <el-steps
         :active="nowStep>=0?nowStep:(streams?streams.length:0)"
@@ -7,23 +7,32 @@
         align-center
       >
         <el-step v-for="s in streams" :key="s.index">
-          <template slot="title">
+          <template #title>
             <div style="white-space:nowrap">{{ s.name }}</div>
-            <el-tooltip
-              :content="`需要${s.firstMemberCompanyName}${getNeedAudit(s.requireMembersAcceptCount)}进行审批`"
-            >
+            <el-tooltip placement="right" effect="light">
+              <template #content>
+                <h3>{{ title }}</h3>
+                <div style="font-size:18px;color:#ccc">{{ s.name }}</div>
+                <div
+                  style="font-size:14px"
+                >{{ `需要[${s.firstMemberCompanyName}]${getNeedAudit(s.requireMembersAcceptCount)}进行审批` }}</div>
+              </template>
               <div
                 style="white-space:nowrap"
               >{{ s.firstMemberCompanyName }}({{ getNeedAudit(s.requireMembersAcceptCount) }})</div>
             </el-tooltip>
           </template>
-          <template v-if="!loading" slot="description">
+          <template slot="description">
             <div v-for="u in s.membersFitToAudit" :key="u">
-              <span
-                v-if="managers[s.firstMemberCompanyCode]&&managers[s.firstMemberCompanyCode].indexOf(u)===-1&&userStatus[s.index]"
-              >
+              <span v-if="user_should_show(u,s)">
                 <UserFormItem :userid="u" :type="userStatus[s.index][u]" style="margin-top:0.5rem" />
               </span>
+            </div>
+            <div
+              v-for="u in s.membersAcceptToAudit.filter(i=>!s.membersFitToAudit.find(j=>j==i))"
+              :key="u"
+            >
+              <UserFormItem :userid="u" :type="userStatus[s.index][u]" style="margin-top:0.5rem" />
             </div>
           </template>
         </el-step>
@@ -33,41 +42,29 @@
 </template>
 
 <script>
-import { auditStream, getUserCompany } from '@/api/user/userinfo'
+import { getUserCompany } from '@/api/user/userinfo'
+import { auditStream } from '@/api/audit/handle'
 import { companiesManagers } from '@/api/company'
 import UserFormItem from '@/components/User/UserFormItem'
-import { debounce } from '@/utils'
 export default {
-  name: 'ApplyAuditStreamPreview',
+  name: 'ApplyAuditStreamPreviewInner',
   components: { UserFormItem },
   props: {
-    userid: {
-      type: String,
-      default: null,
-    },
-    auditStatus: {
-      type: Array,
-      default: null,
-    },
-    nowStep: {
-      type: Number,
-      default: -1,
-    },
+    userid: { type: String, default: null },
+    auditStatus: { type: Array, default: null },
+    nowStep: { type: Number, default: -1 },
+    entityType: { type: String, default: 'vacation' },
+    entityTypeDesc: { type: String, default: null },
+    title: { type: String, default: null }
   },
   data: () => ({
     loading: false,
     solutionName: null,
     streams: [],
     managers: {},
-    userStatus: [],
+    userStatus: []
   }),
-  computed: {
-    updatedStream() {
-      return debounce(() => {
-        this.streamModify()
-      }, 500)
-    },
-  },
+  computed: {},
   watch: {
     auditStatus: {
       handler(val) {
@@ -75,36 +72,57 @@ export default {
         this.solutionName = '审批流'
       },
       deep: true,
-      immediate: true,
+      immediate: true
     },
     userid: {
       handler(val) {
         if (val) {
-          this.solutionName = null
-          auditStream(val).then((data) => {
-            this.solutionName = data.solutionName
-            this.streams = data.steps
-          })
+          this.refresh()
         }
       },
-      immediate: true,
+      immediate: true
+    },
+    entityTypeDesc: {
+      handler(val) {
+        this.refresh()
+      }
     },
     solutionName: {
       handler(val) {
         this.$emit('update:solutionName', val)
       },
-      immediate: true,
+      immediate: true
     },
     streams: {
       handler(val) {
-        if (val) this.updatedStream()
+        if (val) this.streamModify()
       },
       deep: true,
-      immediate: true,
-    },
+      immediate: true
+    }
   },
   methods: {
     auditStream,
+    refresh() {
+      console.log('load audit stream', this.entityTypeDesc)
+      this.solutionName = null
+      auditStream(this.userid, this.entityTypeDesc || this.entityType).then(
+        data => {
+          this.solutionName = data.solutionName
+          this.streams = data.steps
+        }
+      )
+    },
+    user_should_show(u, s) {
+      const managers = this.managers
+      const userStatus = this.userStatus
+      const env_init = managers[s.firstMemberCompanyCode] && userStatus[s.index]
+      if (!env_init) return false
+      const is_manager = managers[s.firstMemberCompanyCode].indexOf(u) > -1
+      const status = userStatus[s.index][u]
+      const is_handled = status === 'success' || status === 'danger'
+      return !is_manager || is_handled
+    },
     getNeedAudit(requireAuditMemberCount) {
       if (requireAuditMemberCount < 0) return '无需'
       if (requireAuditMemberCount === 0) return '所有人'
@@ -137,10 +155,10 @@ export default {
         const mCode = streams[i].firstMemberCompanyCode
         if (waitToLoad.indexOf(mCode) === -1) waitToLoad.push(mCode)
       }
-      companiesManagers(waitToLoad).then((data) => {
+      companiesManagers(waitToLoad).then(data => {
         for (var c of Object.keys(data.companies)) {
           if (data.companies[c].list) {
-            this.managers[c] = data.companies[c].list.map((item) => item.id)
+            this.managers[c] = data.companies[c].list.map(item => item.id)
           } else {
             this.managers[c] = {}
           }
@@ -170,8 +188,8 @@ export default {
       } else {
         this.initCompanyManagerDirect()
       }
-    },
-  },
+    }
+  }
 }
 </script>
 
