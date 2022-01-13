@@ -57,7 +57,20 @@ export function location(code) {
  * @returns
  */
 export function timeZone() {
-  return request.get('systemStatic/timeZone')
+  return new Promise((res, rej) => {
+    const d = {
+      left: {
+        name: '天文时间',
+        value: new Date()
+      },
+      right: {
+        name: '北京时间',
+        value: new Date()
+      }
+    }
+    res(d)
+  })
+  // return request.get('systemStatic/timeZone')
 }
 /**
  *导出单个申请

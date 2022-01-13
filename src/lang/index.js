@@ -5,8 +5,8 @@ import elementEnLocale from 'element-ui/lib/locale/lang/en' // element-ui lang
 import elementZhLocale from 'element-ui/lib/locale/lang/zh-CN'// element-ui lang
 
 import {
-  downloadByPath,
-} from '@/api/common/file'
+  loadLang,
+} from '@/api/config/i18n'
 Vue.use(VueI18n)
 const lang = ['zh', 'en']
 const messages = {
@@ -17,7 +17,6 @@ const messages = {
     ...elementZhLocale
   }
 }
-import defaultSettings from '@/settings'
 
 for (let i = 0; i < lang.length; i++) {
   const l = lang[i]
@@ -29,7 +28,7 @@ for (let i = 0; i < lang.length; i++) {
     const langInfo = require(`./${l}.json`)
     Object.assign(messages[l], langInfo)
   }
-  downloadByPath(`dataview/${defaultSettings.title}`, `${l}.json`, true).then((d) => {
+  loadLang(l).then((d) => {
     const dict = d
     dict.tagsView = dict.settings
     dict.route = Object.assign({}, dict)
@@ -45,7 +44,7 @@ for (let i = 0; i < lang.length; i++) {
 }
 // console.log('default lang loaded', JSON.stringify(messages))
 
-export function getLanguage() {
+export function getLanguage () {
   const chooseLanguage = Cookies.get('language')
   if (chooseLanguage) return chooseLanguage
 

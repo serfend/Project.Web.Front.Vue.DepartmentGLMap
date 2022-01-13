@@ -2,34 +2,6 @@
   "home": {
     "title": "主页"
   },
-  "data-center": {
-    "title": "数据中心",
-    "description": "流量设备集群管理",
-    "traffic": "流量状态",
-    "runtime": "运行状态",
-    "device": {
-      "title": "设备",
-      "runtime": "设备状态"
-    },
-    "config": {
-      "title": "设置选项",
-      "cluste_sync": "集群数据同步",
-      "remove": "移除",
-      "restart": "重启"
-    }
-  },
-  "model-config": {
-    "title": "系统配置",
-    "description": "系统及威胁识别模型配置"
-  },
-  "warning": {
-    "title": "威胁发现",
-    "description": "异常流量告警"
-  },
-  "dashboard": {
-    "title": "全网态势",
-    "description": "全网异常态势概览"
-  },
   "default": {
     "language": {
       "en": "English",
