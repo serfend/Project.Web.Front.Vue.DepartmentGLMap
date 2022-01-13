@@ -1,5 +1,6 @@
-module.exports = {
-  title: '大数据威胁发现系统',
+import aes from './utils/crypto/aes'
+export default {
+  title: aes.decrypt('a13a0470bdc89411bb39c154ce3e3ff145a2461d813b73f052fa2e0ad2953a2e'),
 
   /**
    * @type {boolean} true | false

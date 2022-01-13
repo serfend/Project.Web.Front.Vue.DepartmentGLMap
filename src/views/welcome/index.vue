@@ -33,11 +33,8 @@
           >
             <AppIcon
               style="margin:3em 2em;"
-              :icon="i.icon"
-              :svg="i.svg"
               :size="12"
-              :label="i.label"
-              :description="i.description"
+              v-bind="i"
               @click="lintTo(i)"
             />
           </el-col>
@@ -68,12 +65,14 @@ export default {
             label: this.$t('data-center.title'),
             description: this.$t('data-center.title'),
             svg: 'duoqudaojicheng',
+            disabled: true,
             // icon: '/favicon.png',
             href: '/home/data-center',
           },
           {
             label: this.$t('model-config.title'),
             description: this.$t('model-config.description'),
+            disabled: true,
             svg: 'APIceshi',
             href: '/home/model-config',
           },

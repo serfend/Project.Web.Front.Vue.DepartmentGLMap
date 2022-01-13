@@ -3,6 +3,7 @@
 </template>
 <script>
 import * as echarts from 'echarts'
+import geo from '@/api/config/geo'
 export default {
   name: 'StatisticsDataDriver',
   props: {
@@ -15,17 +16,7 @@ export default {
     loading: false
   }),
   methods: {
-    async refresh() {
-      this.$emit('update:complete', false)
-      this.fileLoad('china-200524.json')
-        .then(data => {
-          echarts.registerMap('china', data)
-          this.$emit('update:complete', true)
-        })
-        .catch(e => {
-          this.$message.error(`加载地图配置失败:${e.message}`)
-        })
-    }
+    initGeoLocations(){}
   }
 }
 </script>

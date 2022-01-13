@@ -6,10 +6,10 @@
   padding: 1.25rem 1.25rem 0;
 }
 .mainbox .column {
-  flex: 2;
+  flex: 5;
 }
 .mainbox .column:nth-child(2) {
-  flex: 5;
+  flex: 2;
   margin: 0 1.25rem 1.875rem;
   overflow: hidden;
 }

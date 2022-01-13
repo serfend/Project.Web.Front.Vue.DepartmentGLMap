@@ -5,10 +5,8 @@
 <script>
 import * as echarts from 'echarts'
 import 'echarts-gl'
-import { geoProvince } from '../../js/variables'
+import geo from '@/api/config/geo'
 import { debounce } from '@/utils'
-import { apiOption } from '../Engine/dataDriverApiOption'
-import { groupByFiled } from '@/utils/data-handle'
 export default {
   name: 'VacationMap3D',
   props: {
@@ -18,11 +16,7 @@ export default {
     },
     height: {
       type: String,
-      default: '300px'
-    },
-    fileLoad: {
-      type: Function,
-      default: null
+      default: '800px'
     },
     speed: {
       type: Number,
@@ -73,7 +67,15 @@ export default {
   methods: {
     initChart() {
       this.chart = echarts.init(this.$el)
-      this.initChartSkeleton()
+      // 加载中国
+      this.loadMap('0').then(() => {
+        this.initChartSkeleton()
+      })
+    },
+    loadMap(code) {
+      return geo.loadMap(code).then(data => {
+        echarts.registerMap('china', data)
+      })
     },
     async refresh() {
       this.chart.showLoading()
@@ -81,54 +83,34 @@ export default {
       this.chart.hideLoading()
     },
     updateData() {
-      const list = Object.keys(this.data)
-        .filter(i => i !== 'types' && apiOption[i].chartShow[2])
-        .map(i => ({
-          key: i,
-          value: groupByFiled(this.data[i], 'type'),
-          name: apiOption[i].name
-        }))
-      const groupList = []
-      list.forEach((v, index_api) => {
-        const { name } = v
-        console.log(v)
-        const keys = Object.keys(v.value)
-        keys.forEach((k, index_type) => {
-          const needReverseLoacation = name.indexOf('完成') > -1
-          const l = {
-            name: `${name}(${k})`,
-            type: 'lines3D',
-            coordinateSystem: 'geo3D',
-            effect: {
-              show: true,
-              trailWidth: 2,
-              trailOpacity: 0.5,
-              trailLength: 0.2,
-              constantSpeed: 5
-            },
-            blendMode: 'lighter',
-            lineStyle: {
-              width: 1,
-              opacity: 0.5,
-              color: this.color[
-                (index_api * this.data.types.length + index_type) %
-                  this.color.length
-              ]
-            },
-            data: v.value[k].map(line => {
-              let from = geoProvince[line.from]
-              let to = geoProvince[line.to]
-              // 可能存在部分人填的是预料之外的值
-              if (!from) from = geoProvince['11']
-              if (!to) to = geoProvince['11']
-              return needReverseLoacation
-                ? [to.location, from.location]
-                : [from.location, to.location]
-            })
+      const convertData = (data) => {
+        return []
+      }
+      const groupList = [{
+        name: 'pm2.5',
+        type: 'scatter',
+        coordinateSystem: 'bmap',
+        data: convertData(this.data),
+        encode: {
+          value: 2
+        },
+        symbolSize: function (val) {
+          return val[2] / 10
+        },
+        label: {
+          formatter: '{b}',
+          position: 'right'
+        },
+        itemStyle: {
+          color: '#ddb926'
+        },
+        emphasis: {
+          label: {
+            show: true
           }
-          groupList.push(l)
-        })
-      })
+        }
+      }]
+
       this.series = groupList
       this.refresh()
     },
@@ -145,13 +127,6 @@ export default {
           map: 'china',
           environment: 'auto',
           shading: 'realistic',
-          // silent: true, 显示各省
-          postEffect: {
-            enable: false
-          },
-          groundPlane: {
-            show: false
-          },
           light: {
             main: {
               intensity: 1,
@@ -161,27 +136,43 @@ export default {
               intensity: 0
             }
           },
+          postEffect: {
+            enable: false
+          },
+          groundPlane: {
+            show: false
+          },
           itemStyle: {
-            color: '#339',
+            color: '#0000003f',
             borderWidth: 1,
             borderColor: '#33f',
             opacity: 0.8
+          },
+          emphasis: {
+            label: {
+              show: true,
+              distance: 2
+            },
+            textStyle: {
+              color: '#fff',
+              fontSize: 200
+            }
           },
           viewControl: {
             // autoRotateDirection: this.rotateDirection,
             // autoRotate: this.speed > 0,
             // autoRotateSpeed: this.speed,
-            damping: 0.8
+            damping: 0.8,
+            distance: 50,
+            maxDistance: 400,
+            minDistance: 0
           },
-          regionHeight: 0.05
+          regionHeight: 0.1
         },
         legend: {
           right: '5%',
           bottom: '20%',
-          orient: 'vertical',
-          textStyle: {
-            color: '#fff'
-          }
+          orient: 'vertical'
         },
         series: []
       }
