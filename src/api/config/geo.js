@@ -7,7 +7,13 @@ export function loadMap (codepath) {
     return request.get(`${path}.geoJson`)
   })
 }
+export function loadLocations() {
+  const url = 'config/geo.json'
+  return cached_data(url, () => {
+    return request.get(url)
+  })
+}
 
 export default {
-  loadMap
+  loadMap, loadLocations
 }

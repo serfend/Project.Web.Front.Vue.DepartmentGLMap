@@ -1,16 +1,15 @@
 const state = {
-  setting: null
+  setting: null,
+  locations: null,
 }
 import {
   pairSetting
 } from '@/utils/data-handle'
 import {
-  createSetting
+  createSetting, loadSettingString
 } from './dashboard/index'
-import {
-  loadSettingString
-} from './dashboard/index'
-
+import { loadLocations, loadMap } from '@/api/config/geo'
+import * as echarts from 'echarts'
 const actions = {
   saveSetting({
     commit,
@@ -20,6 +19,33 @@ const actions = {
     setting
   }) {
     localStorage.setItem(`dashboard.setting[${name}]`, JSON.stringify(setting))
+  },
+  loadLocations({
+    commit,
+    state
+  }) {
+    return new Promise((res, rej) => {
+      if (state.locations) return res(state.locations)
+      loadLocations().then(data => {
+        state.loadLocations = data
+        return res(data)
+      }).catch(e => rej(e))
+    })
+  },
+  loadMap({
+    commit,
+    state
+  }, {
+    name, code
+  }) {
+    return new Promise((res, rej) => {
+      const t = echarts.getMap(name)
+      if (t) return res(t)
+      loadMap(code).then(data => {
+        echarts.registerMap(name, data)
+        return res(data)
+      }).catch(e => rej(e))
+    })
   },
   loadSetting({
     commit,

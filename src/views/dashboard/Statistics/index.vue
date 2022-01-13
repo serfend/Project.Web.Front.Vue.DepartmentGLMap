@@ -18,112 +18,43 @@
             <div class="map1" />
             <div class="map2" />
             <div class="map3" />
-            <VacationMap3D height="100%" :file-load="requestFile" />
+            <VacationMap3D height="100%" />
           </div>
         </div>
         <div class="column">
-          <Square>
-            <RankingBar
-              slot="chart"
-              :data="ranking_data.data"
-              :legend="ranking_data.legend"
-              height="100%"
-            />
-          </Square>
-          <Square>
-            <WarningLine ref="warningLine" slot="chart" height="100%" />
-          </Square>
+          <Square />
+          <Square />
         </div>
       </section>
       <div class="on-right-menu">
-        <EchartGeoLoader
-          ref="echartGeoDriver"
-          :file-load="requestFile"
-          :complete.sync="echartGeoComplete"
-        />
         <SettingEngine ref="setting" :setting.sync="setting" @closed="settingUpdated" />
       </div>
     </div>
-    <VacationMap3D v-else height="87%" :file-load="requestFile" />
+    <VacationMap3D v-else height="87%" />
   </div>
 </template>
 
 <script>
-// import Flexible from './js/flexible'
-import Square from './components/Square'
 
-import TimeCenter from './components/NumberCounter/TimeCenter'
 import { timeZone } from '@/api/common/static'
-import SettingEngine from './components/Engine/SettingEngine'
 import { getProp, modify } from '@/utils/data-handle'
-
-import { requestFile, download } from '@/api/common/file'
 import { debounce } from '@/utils'
-import RankingBar from './components/Bar/RankingBar'
-import WarningLine from './components/Bar/WarningLine'
-import Breadcrumb from '@/components/Breadcrumb'
-const cmp = (a, b) => b.v - a.v
-const Mock = require('mockjs')
-const legend = new Array(10).fill(0).map(i => Mock.Random.ip())
 export default {
   name: 'Statistics',
   components: {
-    Breadcrumb,
-    Square,
-    TimeCenter,
-    EchartGeoLoader: () => import('./components/Engine/EchartGeoLoader'),
-    SettingEngine,
-    RankingBar,
-    WarningLine,
+    Breadcrumb: () => import('@/components/Breadcrumb'),
+    Square: () => import('./components/Square'),
+    TimeCenter: () => import('./components/NumberCounter/TimeCenter'),
+    SettingEngine: () => import('./components/Engine/SettingEngine'),
     VacationMap3D: () => import('./components/Geo/VacationMap3D')
   },
   data: () => ({
-    // flexible: new Flexible(window, document),
     loading: false,
-    echartGeoComplete: false,
     data: null,
     lastUpdate: new Date(),
-    ranking_data: {
-      data: [
-        {
-          name: '端口占用',
-          series: new Array(10)
-            .fill(0)
-            .map((v, i) => ({
-              v: Mock.Random.natural(0, 100),
-              ip: legend[i]
-            }))
-            .sort(cmp)
-        },
-        {
-          name: '连接数',
-          series: new Array(10)
-            .fill(0)
-            .map((v, i) => ({
-              v: Mock.Random.natural(0, 100),
-              ip: legend[i]
-            }))
-            .sort(cmp)
-        },
-        {
-          name: '数据包数',
-          series: new Array(10)
-            .fill(0)
-            .map((v, i) => ({
-              v: Mock.Random.natural(0, 100),
-              ip: legend[i]
-            }))
-            .sort(cmp)
-        }
-      ],
-      legend: legend
-    },
     show_only_map: false
   }),
   computed: {
-    dash () {
-      return this.$store.state.dashboard.dash
-    },
     updatedSetting () {
       return debounce(() => {
         this.settingUpdated()
@@ -159,7 +90,6 @@ export default {
     }
   },
   created () {
-    // this.flexible.init()
   },
   mounted () {
     setTimeout(() => {
@@ -167,7 +97,6 @@ export default {
     }, 2000)
   },
   beforeDestroy () {
-    // this.flexible.terminate()
     window.removeEventListener('resize', this.resize)
   },
   methods: {
@@ -175,11 +104,6 @@ export default {
     modify,
     requireUpdateItems (items) {
       this.$refs.warningLine.updateItems(items)
-    },
-    requestFile (file) {
-      return requestFile('/dataview', file).then(data => {
-        return download(data.file.id)
-      })
     },
     async init () {
       this.$nextTick(() => {
