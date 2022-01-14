@@ -62,20 +62,11 @@ export default {
   to generate 2 formitems on which user can input custome value in it,
   and its would be emit by update:data
    */
-    data: {
-      type: Object,
-      default: null
-    },
-    alias: {
-      type: String,
-      default: null
-    },
+    data: { type: Object, default: null },
+    alias: { type: String, default: null },
     // leaf node will not emit change when setting modify
     // only root node will
-    isLeafNode: {
-      type: Boolean,
-      default: false
-    }
+    isLeafNode: { type: Boolean, default: false }
   },
   data: () => ({
     innerData: null,
@@ -112,19 +103,18 @@ export default {
           this.setting = val.__setting
           delete val.__setting
         }
-        var list = Object.keys(val)
+        const list = Object.keys(val)
         this.innerData = list.map(i => {
-          var item = Object.assign({ key: i }, val[i])
+          const item = Object.assign({ key: i }, val[i])
           if (!item.type) {
-            var isObj =
+            const isObj =
               Object.prototype.toString.call(item.value) === '[object Object]'
-            if (isObj) {
-              item.type = 'MagicForm'
-            } else {
+            if (!isObj) {
               throw new Error(
                 `form item invalid:${item.key} is leaf node but its type not defined`
               )
             }
+            item.type = 'MagicForm'
           }
           return item
         })
@@ -144,11 +134,12 @@ export default {
       }
       this.$nextTick(() => {
         if (this.loading) return
-        var val = this.innerData
-        var changedItem = {}
-        for (var item of val) {
+        const val = this.innerData
+        const changedItem = {}
+        Object.keys(val).map(i => {
+          const item = val[i]
           changedItem[item.key] = Object.assign({}, item)
-          var setting = changedItem[item.key].__setting
+          const setting = changedItem[item.key].__setting
           if (setting) {
             if (setting.useParent) {
               changedItem[item.key].value = this.setting.default
@@ -159,11 +150,12 @@ export default {
             }
             // console.log('update', setting)
           }
-        }
+        })
+        const setting = this.setting
         changedItem.__setting = {
-          useParent: this.setting.useParent,
-          default: this.setting.default,
-          type: this.setting.type
+          useParent: setting.useParent,
+          default: setting.default,
+          type: setting.type
         }
         this.$emit('changed', changedItem)
       })

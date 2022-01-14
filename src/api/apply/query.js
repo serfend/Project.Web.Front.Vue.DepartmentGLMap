@@ -1,5 +1,42 @@
 import request from '@/utils/request'
 import form from '@/utils/form'
+import { cached_data } from '@/utils/cache'
+const apiRank = 'statisticsVacRank'
+/**
+ * 获取申请的排行榜
+ *
+ * @export
+ * @param {*} { user, page, entityType, rankType, date, company }
+ * @return {*}
+ */
+export function getRank(g) {
+  return getRankFunc(`${apiRank}/list`, g)
+}
+export function getRankWithSelf(g) {
+  if (!(g && g.rankType)) return
+  return getRankFunc(`${apiRank}/listWithSelf`, g)
+}
+const getRankFunc = (api, g) => {
+  const { user, pages, entityType, rankType, date, company } = g
+  return request.post(api, {
+    user: form.toQueryValue(user),
+    entityType: form.toQueryValue(entityType),
+    rankType: form.toQueryStartEndByArray([rankType, 0]),
+    date: date && form.toQueryStartEndByArray([date, new Date()]),
+    company: form.toQueryValue(company),
+    page: pages
+  })
+}
+/**
+ * 获取排序类型
+ *
+ * @export
+ * @return {*}
+ */
+export function getRankType() {
+  const url = `${apiRank}/rankTypes`
+  return cached_data(url, (e) => request.get(url), null)
+}
 
 /**
  *导出excel接口
@@ -30,11 +67,22 @@ export function excelReport(params) {
  * @returns
  */
 export function queryList(data, ignoreErr) {
-  return request.post('/apply/list', data, {
+  return request.post(`/apply/list/${data.entityType}`, data, {
     ignoreError: ignoreErr
   })
 }
-
+/**
+ *按筛选查询申请列表的id
+ *
+ * @export
+ * @param {*} data
+ * @param {*} ignoreErr
+ */
+export function queryListId(data, ignoreErr) {
+  return request.post(`/apply/listShadow/${data.entityType}`, data, {
+    ignoreError: ignoreErr
+  })
+}
 /**
  * 构造一个查询模型
  *
@@ -57,30 +105,33 @@ export function queryList(data, ignoreErr) {
     companyType: Array:String
  * @param {Pages} pages
  */
-export function createQueryApplyModel(model, pages) {
+export function createQueryApplyModel({ data, pages, entityType }) {
   const f = {
-    pages: Object.assign({}, pages)
+    pages: Object.assign({}, pages),
+    entityType
   }
   const userStatus =
-    (model.isMarried ? 1 : 0) |
-    (model.isApart ? 2 : 0)
+    (data.isMarried ? 1 : 0) |
+    (data.isApart ? 2 : 0)
   if (userStatus) f.userStatus = form.toQueryArrays([userStatus])
   const companyStatus =
-    (model.isRemote ? 1 : 0)
+    (data.isRemote ? 1 : 0)
   if (companyStatus) f.companyStatus = form.toQueryArrays([companyStatus])
-  f.create = form.toQueryStartEndByArray(model.createTime)
-  f.stampLeave = form.toQueryStartEndByArray(model.stampLeaveTime)
-  f.stampReturn = form.toQueryStartEndByArray(model.stampReturnTime)
-  f.status = form.toQueryArrays(model.status)
-  f.executeStatus = form.toQueryValue(model.executeStatus)
-  f.auditBy = form.toQueryValue(model.auditBy)
-  f.nowAuditBy = form.toQueryValue(model.nowAuditBy)
-  f.createCompany = form.toQueryArrays(model.createCompany)
-  f.dutiesType = form.toQueryValue(model.dutiesType)
-  f.companyType = form.toQueryValue(model.companyType)
-  f.createFor = form.toQueryValue(model.createFor)
-
-  f.auth = model.auth
+  f.create = form.toQueryStartEndByArray(data.createTime)
+  f.stampLeave = form.toQueryStartEndByArray(data.stampLeaveTime)
+  f.stampReturn = form.toQueryStartEndByArray(data.stampReturnTime)
+  f.status = form.toQueryArrays(data.status)
+  f.mainStatus = (undefined === data.mainStatus || data.mainStatus < 0) ? null : { start: data.mainStatus }
+  f.executeStatus = form.toQueryValue(data.executeStatus)
+  f.auditBy = form.toQueryValue(data.auditBy)
+  f.nowAuditBy = form.toQueryValue(data.nowAuditBy)
+  f.createCompany = form.toQueryArrays(data.createCompany)
+  f.dutiesType = form.toQueryValue(data.dutiesType)
+  f.companyType = form.toQueryValue(data.companyType)
+  f.createFor = form.toQueryValue(data.createFor)
+  f.vacationAdminDivision = form.toQueryStartEndByArray([data.vacationAdminDivision && data.vacationAdminDivision.code, 0])
+  f.requestCounts = form.toQueryStartEndByArray(data.requestCounts)
+  f.auth = data.auth
   return f
 }
 
@@ -90,21 +141,21 @@ export function createQueryApplyModel(model, pages) {
  * @export
  * @param {Object} pages 分页
  * @param {Array} status 状态
- * @param {String} myAuditStatus 我的状态：accept,deny,unreceive,received,null
+ * @param {String} actionStatus 我的状态：accept,deny,unreceive,received,null
  * @param {int} executeStatus 落实状态
  */
-export function queryMyAudit(pages, status, myAuditStatus, executeStatus) {
-  pages = (!pages) ? {
+export function queryMyAudit({ pages, status, actionStatus, executeStatus, entityType }) {
+  pages = pages || {
     pageIndex: 0,
     pageSize: 20
-  } : pages
+  }
 
-  return request.get('/apply/listOfMyAudit', {
+  return request.get(`/apply/listOfMyAudit/${entityType}`, {
     params: {
       pageIndex: pages.pageIndex,
       pageSize: pages.pageSize,
       status: status.join('##'),
-      actionStatus: myAuditStatus,
+      actionStatus,
       executeStatus
     }
   })
@@ -118,13 +169,14 @@ export function queryMyAudit(pages, status, myAuditStatus, executeStatus) {
  * @param {String} id 查询用户的id，默认为当前登录用户
  * @param {String} start 起始日期，默认为今年1月1日
  * @param {String} end 终止日期，默认为今天
+ * @param {String} entityType 申请类型/应用名称
  */
-export function querySelf(pages, id, start, end) {
+export function querySelf({ pages, id, start, end, entityType }) {
   pages = (!pages) ? {
     pageIndex: 0,
     pageSize: 20
   } : pages
-  return request.get('/apply/listOfSelf', {
+  return request.get(`/apply/listOfSelf/${entityType}`, {
     params: {
       id,
       pageIndex: pages.pageIndex,
@@ -142,10 +194,11 @@ export function querySelf(pages, id, start, end) {
  * @param {*} id
  * @returns
  */
-export function detail(id) {
-  return request('/apply/detail', {
+export function detail({ id, ignoreError, entityType }) {
+  return request(`/apply/detail/${entityType}`, {
     params: {
       id
-    }
+    },
+    ignoreError
   })
 }

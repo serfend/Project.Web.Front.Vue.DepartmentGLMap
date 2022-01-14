@@ -1,5 +1,27 @@
 import request from '@/utils/request'
+/**
+ * 获取菜单
+ *
+ * @export
+ * @param {*} menuName
+ * @return {*}
+ */
+export function getMenu(menuName) {
+  return request.get('navigation/list', {
+    params: { menuName }
+  })
+}
 
+/**
+ * 更新菜单
+ *
+ * @export
+ * @param {*} { name, alias, description, icon, parent, svg, url }
+ * @return {*}
+ */
+export function postMenu({ name, alias, description, icon, parent, svg, url }) {
+  return request.post('navigation/info', { name, alias, description, icon, parent, svg, url })
+}
 /**
  * 刷新验证码
  *
@@ -57,20 +79,7 @@ export function location(code) {
  * @returns
  */
 export function timeZone() {
-  return new Promise((res, rej) => {
-    const d = {
-      left: {
-        name: '天文时间',
-        value: new Date()
-      },
-      right: {
-        name: '北京时间',
-        value: new Date()
-      }
-    }
-    res(d)
-  })
-  // return request.get('systemStatic/timeZone')
+  return request.get('systemStatic/timeZone')
 }
 /**
  *导出单个申请
@@ -87,7 +96,8 @@ export function exportSingleApply(templete, applyId) {
         value: applyId
       }
     }).then(data => {
-      downloadUrl(data.requestUrl)
+      const f = data.model
+      downloadUrl(`file/frompath?path=${f.fullPath}&filename=${f.name}`)
       res(data)
     }).catch(e => rej(e))
   })
@@ -107,16 +117,16 @@ export function exportMultiApplies(templete, applies) {
         arrays: applies
       }
     }).then(data => {
-      downloadUrl(data.requestUrl)
+      const f = data.model
+      downloadUrl(`file/frompath?path=${f.fullPath}&filename=${f.name}`)
       res(data)
     }).catch(e => rej(e))
   })
 }
 
 export function downloadUrl(url) {
-  var requestUrl = process.env.VUE_APP_BASEURL + url
   var a = document.createElement('a')
-  a.href = requestUrl
+  a.href = require('@/utils/website').getWebUrlPath(url)
   a.click()
 }
 /**

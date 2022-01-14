@@ -1,5 +1,7 @@
 import request from '@/utils/request'
-
+import { cached_data } from '@/utils/cache'
+const api = 'users'
+const urlGetUserSummary = `${api}/summary`
 /**
  * 获取用户摘要信息
  *
@@ -9,13 +11,18 @@ import request from '@/utils/request'
  * @returns
  */
 export function getUserSummary(id, ignoreErr) {
-  return request.get('users/summary', {
-    params: {
-      id
-    },
-    ignoreError: ignoreErr
-  })
+  const action = () =>
+    request.get(urlGetUserSummary, {
+      params: {
+        id
+      },
+      ignoreError: ignoreErr
+    })
+
+  return id ? cached_data(`${urlGetUserSummary}/${id}`, action
+  ) : action()
 }
+const urlGetUserBase = `${api}/base`
 /**
  * 基础信息
  * @description > ``` response
@@ -28,12 +35,14 @@ export function getUserSummary(id, ignoreErr) {
   ```
  */
 export function getUserBase(id, ignoreErr) {
-  return request.get('users/base', {
-    params: {
-      id
-    },
-    ignoreError: ignoreErr
-  })
+  return cached_data(`${urlGetUserBase}/${id}`, () =>
+    request.get(urlGetUserBase, {
+      params: {
+        id
+      },
+      ignoreError: ignoreErr
+    })
+  )
 }
 
 export function getUserDiy(id, ignoreErr) {
@@ -149,32 +158,39 @@ export function getUserIdByCid(cid, ignoreErr) {
  * @param {int} pageIndex
  * @param {int} pageSize
  * @param {Boolean} ignoreErr
+ * @param {Boolean} fuzz
  * @returns
  */
-export function getUserIdByRealName(realName, pageIndex, pageSize, ignoreErr) {
+export function getUserIdByRealName({ realName, pageIndex, pageSize, ignoreErr, fuzz }) {
   return request.get('/account/GetUserIdByRealName', {
     params: {
       realName,
       pageIndex,
-      pageSize
+      pageSize,
+      fuzz
     },
     ignoreError: ignoreErr
   })
 }
-
+const url_getUsersVacationLimit = `${api}/vacation`
 /**
  * 获取用户休假限制时长和次数
- * @param {*} id
+ * @param {*} userid 用户名
+ * @param {*} vacationYear 休假年度
  */
-export function getUsersVacationLimit(id, ignoreErr) {
-  return request.get('/users/vacation', {
-    params: {
-      id
-    },
-    ignoreError: ignoreErr
-  })
+export function getUsersVacationLimit({ userid, vacationYear, isPlan, ignoreErr }) {
+  return cached_data(`${url_getUsersVacationLimit}/${userid}/${vacationYear}/${isPlan}`, () =>
+    request.get(url_getUsersVacationLimit, {
+      params: {
+        id: userid,
+        vacationYear,
+        isPlan
+      },
+      ignoreError: ignoreErr
+    })
+  )
 }
-
+const url_getUserAvatar = `${api}/avatar`
 /**
  * 获取用户头像
  *
@@ -184,13 +200,15 @@ export function getUsersVacationLimit(id, ignoreErr) {
  * @returns
  */
 export function getUserAvatar(id, avatarId, ignoreErr) {
-  return request.get('/users/avatar', {
-    params: {
-      userId: id,
-      avatarId
-    },
-    ignoreError: ignoreErr
-  })
+  return cached_data(`${url_getUserAvatar}/${id}/${avatarId}`, () =>
+    request.get(url_getUserAvatar, {
+      params: {
+        userId: id,
+        avatarId
+      },
+      ignoreError: ignoreErr
+    })
+  )
 }
 /**
  *修改用户头像
@@ -204,20 +222,5 @@ export function postUserAvatar(newAvatar, ignoreErr) {
     url: newAvatar
   }, {
     ignoreError: ignoreErr
-  })
-}
-
-/**
- * 获取指定用户的审批流
- *
- * @export
- * @param {*} id
- * @returns
- */
-export function auditStream(id) {
-  return request.get('/users/auditStream', {
-    params: {
-      id
-    }
   })
 }

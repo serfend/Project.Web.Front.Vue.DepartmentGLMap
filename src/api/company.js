@@ -1,4 +1,6 @@
 import request from '@/utils/request'
+import { cached_data } from '@/utils/cache'
+const api = 'company'
 /**
  * 获取单位的子单位
  *
@@ -11,27 +13,29 @@ import request from '@/utils/request'
  *      {string} list[i].code:""
  */
 export function companyChild(id) {
-  return request.get('company/companyChild', {
+  return request.get(`${api}/companyChild`, {
     params: {
       id: id
     }
   })
 }
 
+const urlCompanyDetail = `${api}/detail`
 /**
- * 获取单位信息
- *
- * @export
- * @param {*} id
- */
+* 获取单位信息
+*
+* @export
+* @param {*} id
+*/
 export function companyDetail(id) {
-  return request.get('company/detail', {
-    params: {
-      id
-    }
-  })
+  return cached_data(`${urlCompanyDetail}/${id}`, () =>
+    request.get(urlCompanyDetail, {
+      params: {
+        id
+      }
+    })
+  )
 }
-
 /**
  *获取单位主管列表
  *
@@ -49,7 +53,7 @@ export function Managers(id, userid) {
     }
   })
 }
-
+const urlCompaniesManagers = `${api}/companiesManagers`
 /**
  * 获取多个单位的管理
  *
@@ -58,11 +62,12 @@ export function Managers(id, userid) {
  * @returns
  */
 export function companiesManagers(ids) {
-  return request.get('/company/companiesManagers', {
-    params: {
-      ids: ids.join('##')
-    }
-  })
+  const ids_str = ids.join('##')
+  return cached_data(`${urlCompaniesManagers}/${ids_str}`, () =>
+    request.get(urlCompaniesManagers, {
+      params: { ids: ids_str }
+    })
+  )
 }
 
 /**
@@ -71,13 +76,15 @@ export function companiesManagers(ids) {
  */
 export function getMembers({
   code,
-  page,
+  asManage,
+  pageIndex,
   pageSize
 }) {
   return request.get('/company/members', {
     params: {
       code,
-      page,
+      asManage,
+      page: pageIndex,
       pageSize
     }
   })
@@ -111,7 +118,7 @@ export function dutiesDetail(name) {
  */
 export function dutiesQuery(name, tag, page) {
   page = page || {
-    pageSize: 20,
+    pageSize: 50,
     pageIndex: 0
   }
   const {
