@@ -5,31 +5,16 @@
 <script>
 import * as echarts from 'echarts'
 import 'echarts-gl'
-import geo from '@/api/config/geo'
+import { build_scatter } from '../../js/scatter'
 import { debounce } from '@/utils'
 export default {
   name: 'VacationMap3D',
   props: {
-    width: {
-      type: String,
-      default: '100%'
-    },
-    height: {
-      type: String,
-      default: '800px'
-    },
-    speed: {
-      type: Number,
-      default: 1
-    },
-    color: {
-      type: Array,
-      default: () => []
-    },
-    data: {
-      type: Object,
-      default: () => {} // {#typeName#:{from,to,value}}省份对应的坐标
-    }
+    width: { type: String, default: '100%' },
+    height: { type: String, default: '800px' },
+    speed: { type: Number, default: 1 },
+    color: { type: Array, default: () => [] },
+    data: { type: Object, default: () => {} }
   },
   data() {
     return {
@@ -41,7 +26,7 @@ export default {
     updatedData() {
       return debounce(() => {
         this.updateData()
-      }, 1000)
+      }, 100)
     }
   },
   watch: {
@@ -51,11 +36,15 @@ export default {
           this.updatedData()
         })
       },
-      deep: true
+      deep: true,
+      immediate: true
     }
   },
   mounted() {
     this.initChart()
+    setTimeout(() => {
+      this.refresh()
+    }, 1e3)
   },
   beforeDestroy() {
     if (!this.chart) {
@@ -68,13 +57,9 @@ export default {
     initChart() {
       this.chart = echarts.init(this.$el)
       // 加载中国
-      this.loadMap('0').then(() => {
+      this.$store.dispatch('dashboard/loadLocations')
+      this.$store.dispatch('dashboard/loadMap', { name: 'china', code: '0' }).then(() => {
         this.initChartSkeleton()
-      })
-    },
-    loadMap(code) {
-      return geo.loadMap(code).then(data => {
-        echarts.registerMap('china', data)
       })
     },
     async refresh() {
@@ -84,47 +69,49 @@ export default {
     },
     updateData() {
       const convertData = (data) => {
-        return []
-      }
-      const groupList = [{
-        name: 'pm2.5',
-        type: 'scatter',
-        coordinateSystem: 'bmap',
-        data: convertData(this.data),
-        encode: {
-          value: 2
-        },
-        symbolSize: function (val) {
-          return val[2] / 10
-        },
-        label: {
-          formatter: '{b}',
-          position: 'right'
-        },
-        itemStyle: {
-          color: '#ddb926'
-        },
-        emphasis: {
-          label: {
-            show: true
-          }
+        return {
+          name: data.name,
+          value: [116, 28, data.value]
         }
-      }]
+      }
+      const series = Object.keys(this.data)
+
+      const groupList = series.map(list_key => {
+        const list = this.data[list_key].map(convertData)
+        const t = build_scatter(list)
+        return t
+      })
 
       this.series = groupList
       this.refresh()
     },
     refreshData() {
       const series = this.series
-      // console.log(series)
+      console.log(series)
       this.chart.setOption({
         series: series
       })
     },
     initChartSkeleton() {
+      const titleStyle = {
+        color: '#18ffff',
+        fontSize: 48,
+        textShadowBlur: 50,
+        textShadowColor: 'rgba(200,255,200,0.5)'
+      }
       const option = {
-        geo3D: {
+        title: {
+          text: this.$t('dash.t.map.title'),
+          textStyle: titleStyle,
+          subtext: this.$t('dash.t.map.subtitle'),
+          top: '20', left: 'center'
+        },
+        tooltip: {
+          trigger: 'item'
+        },
+        geo: {
           map: 'china',
+          roam: true,
           environment: 'auto',
           shading: 'realistic',
           light: {
@@ -133,11 +120,11 @@ export default {
               alpha: 30
             },
             ambient: {
-              intensity: 0
+              intensity: 0.5
             }
           },
           postEffect: {
-            enable: false
+            enable: true
           },
           groundPlane: {
             show: false
@@ -148,31 +135,24 @@ export default {
             borderColor: '#33f',
             opacity: 0.8
           },
+          label: {
+            show: true,
+            textStyle: {
+              fontSize: 10,
+              color: '#ffffff3c'
+            }
+          },
           emphasis: {
             label: {
               show: true,
-              distance: 2
-            },
-            textStyle: {
-              color: '#fff',
-              fontSize: 200
+              textStyle: {
+                fontSize: 18,
+                color: '#fff'
+              }
             }
           },
-          viewControl: {
-            // autoRotateDirection: this.rotateDirection,
-            // autoRotate: this.speed > 0,
-            // autoRotateSpeed: this.speed,
-            damping: 0.8,
-            distance: 50,
-            maxDistance: 400,
-            minDistance: 0
-          },
-          regionHeight: 0.1
-        },
-        legend: {
-          right: '5%',
-          bottom: '20%',
-          orient: 'vertical'
+          center: [100, 35],
+          zoom: 3
         },
         series: []
       }

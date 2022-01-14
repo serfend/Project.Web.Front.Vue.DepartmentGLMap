@@ -21,7 +21,7 @@
       <el-link slot="reference" type="primary" href="https://www.baidu.com">参考文献</el-link>
     </el-popover>
     <div style="float:right;color:#bbb">
-      <span>©2020 sf</span>
+      <span>©2022 sf</span>
       <span>{{ $store.state.settings.title }}</span>
       <el-popover trigger="hover">
         <p>{{ $store.state.settings.notice }}</p>

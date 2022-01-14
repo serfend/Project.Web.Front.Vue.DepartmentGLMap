@@ -9,6 +9,9 @@ import Statistics from './Statistics'
 
 export default {
   name: 'Dashboard',
-  components: { Statistics }
+  components: { Statistics },
+  mounted() {
+    this.$store.dispatch('common_fields/init')
+  }
 }
 </script>

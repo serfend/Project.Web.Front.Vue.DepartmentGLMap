@@ -18,19 +18,21 @@
             <div class="map1" />
             <div class="map2" />
             <div class="map3" />
-            <VacationMap3D height="100%" />
+            <VacationMap3D height="100%" :data="default_map_data" />
           </div>
         </div>
         <div class="column">
-          <Square />
-          <Square />
+          <Square>
+            <CommonFilter slot="chart" v-model="filter" :fields="field_list" :data="field_data" />
+          </Square>
+          <Square>1</Square>
         </div>
       </section>
       <div class="on-right-menu">
         <SettingEngine ref="setting" :setting.sync="setting" @closed="settingUpdated" />
       </div>
     </div>
-    <VacationMap3D v-else height="87%" />
+    <VacationMap3D v-else height="87%" :data="default_map_data" />
   </div>
 </template>
 
@@ -46,19 +48,32 @@ export default {
     Square: () => import('./components/Square'),
     TimeCenter: () => import('./components/NumberCounter/TimeCenter'),
     SettingEngine: () => import('./components/Engine/SettingEngine'),
-    VacationMap3D: () => import('./components/Geo/VacationMap3D')
+    VacationMap3D: () => import('./components/Geo/VacationMap3D'),
+    CommonFilter: () => import('@/views/CommonField/CommonFilter')
   },
   data: () => ({
     loading: false,
     data: null,
     lastUpdate: new Date(),
-    show_only_map: false
+    show_only_map: false,
+    default_map_data: {
+      main: [{ name: 'test', value: 15 }, { name: 'GGG', value: 22 }]
+    },
+    filter: {}
   }),
   computed: {
     updatedSetting () {
       return debounce(() => {
         this.settingUpdated()
       }, 1000)
+    },
+    field_data() {
+      const d = this.$store.state.common_fields.data
+      return d && d.list
+    },
+    field_list() {
+      const d = this.$store.state.common_fields.fields
+      return d && d.list
     },
     setting: {
       get () {
