@@ -2,10 +2,10 @@
   <el-dialog :visible.sync="show">
     <el-form v-if="data" label-width="5rem">
       <el-form-item label="名称">
-        <el-input v-model="data.name" />
+        <el-input :value.sync="data.name" />
       </el-form-item>
       <el-form-item label="描述">
-        <el-input v-model="data.description" type="textarea" />
+        <el-input :value.sync="data.description" type="textarea" />
       </el-form-item>
       <el-form-item label="负责单位">
         <CompanySelector :code.sync="data.holdBy" />
@@ -15,13 +15,13 @@
       </el-form-item>
       <el-form-item label="考核日期">
         <el-date-picker
-          v-model="data.executeTime"
+          :value.sync="data.executeTime"
           format="yyyy年MM月dd日"
           value-format="yyyy-MM-dd"
           clearable
         />
       </el-form-item>
-      <AuthCode v-model="auth" />
+      <AuthCode v-model="auth" select-name="考核编辑" />
     </el-form>
     <el-alert v-else type="error">数据没有准备好</el-alert>
     <div slot="footer">
@@ -86,5 +86,4 @@ export default {
 }
 </script>
 
-<style>
-</style>
+<style></style>

@@ -1,5 +1,5 @@
 <template>
-  <el-container>
+  <el-container v-loading="loading">
     <div style="width:100%;height:100%">
       <el-main style="height:100%;user-select:none">
         <el-row v-if="showTitle" type="flex">
@@ -31,12 +31,7 @@
             :lg="6"
             style="display:flex;justify-content:center"
           >
-            <AppIcon
-              style="margin:3em 2em;"
-              :size="12"
-              v-bind="i"
-              @click="lintTo(i)"
-            />
+            <AppIcon style="margin:3em 2em;" :size="12" v-bind="i" @click="lintTo(i)" />
           </el-col>
         </el-row>
         <Footer />
@@ -47,84 +42,80 @@
 
 <script>
 import AppIcon from '@/components/AppIcon'
-import Footer from './Footer'
 import { formatTime } from '@/utils'
+import { getMenu } from '@/api/common/static'
+import Footer from '@/views/welcome/Footer'
+import { default_pages } from './setting'
 export default {
   name: 'Welcome',
   components: { AppIcon, Footer },
   props: {
     showTitle: {
       type: Boolean,
-      default: true,
+      default: true
+    },
+    menuName: {
+      type: String,
+      default: null
     },
     list: {
       type: Array,
-      default() {
-        return [
-          {
-            label: this.$t('data-center.title'),
-            description: this.$t('data-center.title'),
-            svg: 'duoqudaojicheng',
-            disabled: true,
-            // icon: '/favicon.png',
-            href: '/home/data-center',
-          },
-          {
-            label: this.$t('model-config.title'),
-            description: this.$t('model-config.description'),
-            disabled: true,
-            svg: 'APIceshi',
-            href: '/home/model-config',
-          },
-          {
-            label: this.$t('warning.title'),
-            description: this.$t('warning.description'),
-            // icon: '/favicon.png',
-            svg: 'anquan',
-            href: '/home/warning',
-          },
-          {
-            label: this.$t('dashboard.title'),
-            description: this.$t('dashboard.description'),
-            // icon: '/favicon.png',
-            svg: 'wangluocuowushuai',
-            href: '/home/dashboard',
-          },
-        ]
-      },
-    },
-  },
-  data() {
-    return {
-      qrCodeUrl: '',
-      innerList: [],
+      default: () => default_pages
     }
   },
+  data: () => ({
+    loading: false,
+    qrCodeUrl: '',
+    default_pages,
+    innerList: []
+  }),
   watch: {
     list: {
       handler(val) {
-        if (!val) return
-        var result = []
-        var vLen = val.length
-        for (var j = 0; j < vLen; j++) {
-          result.push(Object.assign(val[j], { id: Math.random() }))
-        }
-        this.innerList = result
+        if (!val || this.menuName) return
+        this.innerList = val.map(i => {
+          i.id = Math.random()
+          i.label = this.$t(i.label)
+          i.description = this.$t(i.description)
+          return i
+        })
       },
-      immediate: true,
+      immediate: true
     },
+    menuName: {
+      handler(v) {
+        if (v) {
+          this.refresh()
+        }
+      },
+      immediate: true
+    }
   },
   methods: {
     formatTime,
+    refresh() {
+      this.loading = true
+      getMenu(this.menuName)
+        .then(data => {
+          this.innerList = data.list.map(i => {
+            i.href = i.url
+            i.label = i.alias
+            return i
+          })
+        })
+        .finally(() => {
+          this.loading = false
+        })
+    },
     lintTo(item) {
       if (item.callback) {
         item.callback()
       }
       if (item.href) {
-        this.$router.push(item.href)
+        location.href = item.href
       }
-    },
-  },
+    }
+  }
 }
 </script>
 
@@ -137,5 +128,6 @@ export default {
   width: 100%;
   height: 100%;
   background: url(~@/assets/jpg/app/reg_bg_min_blur.jpg) no-repeat;
+  background-size: cover;
 }
 </style>

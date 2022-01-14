@@ -243,9 +243,11 @@
           >{{ tag.realName }}</el-tag>
         </el-form-item>
         <el-form-item label="审批人数量">
-          <el-input-number v-model="newNode.auditMembersCount" placeholder="需要多少人审批" />
+          <el-tooltip content="需要多少人审批">
+            <el-input-number v-model="newNode.auditMembersCount" />
+          </el-tooltip>
         </el-form-item>
-        <AuthCode :form.sync="newNode.auth" />
+        <AuthCode :form.sync="newNode.auth" select-name="审批流节点编辑" />
         <el-button-group style="width:100%">
           <el-button
             v-loading="newNode.loading"
@@ -270,8 +272,8 @@ import {
   addStreamNode,
   editStreamNode,
   deleteStreamNode,
-  buildFilter,
-} from '@/api/applyAuditStream'
+  buildFilter
+} from '@/api/audit/applyAuditStream'
 import CompaniesSelector from '@/components/Company/CompaniesSelector'
 import DutiesSelector from '@/components/Duty/DutiesSelector'
 import AuthCode from '@/components/AuthCode'
@@ -289,7 +291,7 @@ export default {
     AuthCode,
     UserFormItem,
     DutiesSelector,
-    UserSelector,
+    UserSelector
   },
   props: {
     data: {
@@ -303,25 +305,25 @@ export default {
           allSolution: [],
           allSolutionDic: {},
           allActionNode: [],
-          allActionNodeDic: {},
+          allActionNodeDic: {}
         }
-      },
+      }
     },
     loading: {
       type: Boolean,
-      default: false,
-    },
+      default: false
+    }
   },
   data() {
     return {
       companyReferDic: [
         { value: '', label: '不使用相对' },
         { value: 'self', label: '本级审核' },
-        { value: 'parent', label: '上级审核' },
+        { value: 'parent', label: '上级审核' }
       ],
       nodeDialogShow: false,
       newNode: this.buildnewNode(),
-      userSelect: {},
+      userSelect: {}
     }
   },
   methods: {
@@ -330,7 +332,7 @@ export default {
     },
     checkAuditMembersIndex(id) {
       const node = this.newNode
-      const auditMembers = node.auditMembers.map((i) => i.id)
+      const auditMembers = node.auditMembers.map(i => i.id)
       return auditMembers.indexOf(id)
     },
     handleUserSelectChange(val) {
@@ -344,7 +346,7 @@ export default {
     },
     handleCompaniesSelectClose(tag) {
       const node = this.newNode
-      const companies = node.companies.map((i) => i.code)
+      const companies = node.companies.map(i => i.code)
       const code = tag.code
       node.companies.splice(companies.indexOf(code), 1)
     },
@@ -355,7 +357,7 @@ export default {
     },
     handleDutiesSelectClose(tag) {
       const node = this.newNode
-      const i = node.duties.map((i) => i.code).indexOf(tag.code)
+      const i = node.duties.map(i => i.code).indexOf(tag.code)
       node.duties.splice(i, 1)
     },
     refresh() {
@@ -375,15 +377,19 @@ export default {
       node.loading = true
       var fn = node.mode === 'edit' ? editStreamNode : addStreamNode
       const region = this.data.newCompanyRegion || {}
-
-      fn(
-        node.id,
-        node.name,
-        region.code,
-        node.description,
-        buildFilter(node),
-        node.auth
-      )
+      fn({
+        id: node.id,
+        name: node.name,
+        companyRegion: region.code,
+        description: node.description,
+        filter: buildFilter(
+          Object.assign(
+            { entityType: this.data.entityTypeDesc.split('|')[0] },
+            node
+          )
+        ),
+        auth: node.auth
+      })
         .then(() => {
           this.$message.success(`节点${node.name}已提交`)
           this.refresh()
@@ -400,7 +406,12 @@ export default {
       if (!auth) {
         auth = {}
       }
-      deleteStreamNode(node.name, auth.authByUserId, auth.code)
+      deleteStreamNode({
+        name: node.name,
+        entityType: this.data.entityTypeDesc.split('|')[0],
+        authByUserId: auth.authByUserId,
+        code: auth.code
+      })
         .then(() => {
           this.$message.success(`${node.name}已删除`)
           this.nodeDialogShow = false
@@ -416,7 +427,7 @@ export default {
       if (lastAuth === null) {
         lastAuth = {
           authByUserId: '',
-          code: 0,
+          code: 0
         }
       }
       return {
@@ -433,10 +444,10 @@ export default {
         auditMembersCount: 1,
         auditMembers: [],
         auth: lastAuth,
-        loading: false,
+        loading: false
       }
-    },
-  },
+    }
+  }
 }
 </script>
 

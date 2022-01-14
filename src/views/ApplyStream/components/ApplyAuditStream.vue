@@ -96,19 +96,21 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-tree
-          :data="newSolution.nodes"
-          node-key="id"
-          draggable
-          default-expand-all
-          :expand-on-click-node="false"
-        >
-          <div slot-scope="{node}" class="custom-tree-node">
-            <el-tag closable effect="plain" @close="handleSelectNodeClose(node)">{{ node.label }}</el-tag>
-            <span>{{ node.data.description }}</span>
-          </div>
-        </el-tree>
-        <AuthCode :form.sync="newSolution.auth" />
+        <el-card>
+          <el-tree
+            :data="newSolution.nodes"
+            node-key="id"
+            draggable
+            default-expand-all
+            :expand-on-click-node="false"
+          >
+            <div slot-scope="{node}" class="custom-tree-node">
+              <el-tag closable effect="plain" @close="handleSelectNodeClose(node)">{{ node.label }}</el-tag>
+              <span>{{ node.data.description }}</span>
+            </div>
+          </el-tree>
+        </el-card>
+        <AuthCode :form.sync="newSolution.auth" select-name="审批流编辑" />
         <el-button-group style="width:100%">
           <el-button
             v-loading="newSolution.loading"
@@ -135,8 +137,8 @@ import { formatTime } from '@/utils'
 import {
   addStreamSolution,
   editStreamSolution,
-  deleteStreamSolution,
-} from '@/api/applyAuditStream'
+  deleteStreamSolution
+} from '@/api/audit/applyAuditStream'
 export default {
   name: 'ApplyAuditStream',
   components: { AuthCode, CompanyFormItem },
@@ -152,21 +154,30 @@ export default {
           allSolution: [],
           allSolutionDic: {},
           allActionNode: [],
-          allActionNodeDic: {},
+          allActionNodeDic: {}
         }
-      },
+      }
     },
     loading: {
       type: Boolean,
-      default: false,
-    },
-  },
-  data() {
-    return {
-      nodeDialogShow: false,
-      newSolution: this.buildNewSolution(),
+      default: false
     }
   },
+  data: () => ({
+    nodeDialogShow: false,
+    newSolution: {
+      mode: 'new',
+      name: '',
+      description: '',
+      nodeSelect: '',
+      nodes: [],
+      auth: {
+        authByUserId: '',
+        code: 0
+      },
+      loading: false
+    }
+  }),
   methods: {
     format(d) {
       return formatTime(d)
@@ -180,14 +191,15 @@ export default {
       node.loading = true
       var fn = node.mode === 'edit' ? editStreamSolution : addStreamSolution
       const region = this.data.newCompanyRegion || {}
-      fn(
-        node.id,
-        node.name,
-        region.code,
-        node.description,
-        node.nodes.map((i) => i.label),
-        node.auth
-      )
+      fn({
+        id: node.id,
+        name: node.name,
+        companyRegion: region.code,
+        entityType: this.data.entityTypeDesc.split('|')[0],
+        description: node.description,
+        nodes: node.nodes.map(i => i.label),
+        auth: node.auth
+      })
         .then(() => {
           this.$message.success(`方案${node.name}已提交`)
           this.refresh()
@@ -204,7 +216,7 @@ export default {
         node.id = target.id
         node.name = target.name
         node.description = target.description
-        node.nodes = target.nodes.map((i) => {
+        node.nodes = target.nodes.map(i => {
           if (!i) i = { name: '无效的节点' }
           return this.buildNodeSelect(i.name)
         })
@@ -218,7 +230,12 @@ export default {
       if (!auth) {
         auth = {}
       }
-      deleteStreamSolution(node.name, auth.authByUserId, auth.code)
+      deleteStreamSolution({
+        name: node.name,
+        authByUserId: auth.authByUserId,
+        entityType: this.data.entityTypeDesc.split('|')[0],
+        code: auth.code
+      })
         .then(() => {
           this.$message.success(`${node.name}已删除`)
           this.nodeDialogShow = false
@@ -233,7 +250,7 @@ export default {
       return {
         id: Math.random(),
         label: val,
-        description: s && s.description,
+        description: s && s.description
       }
     },
     selectNodeChanged(val) {
@@ -244,29 +261,10 @@ export default {
     handleSelectNodeClose(node) {
       const no = this.newSolution
       var id = node.data.id
-      var index = no.nodes.findIndex((n) => n.id === id)
+      var index = no.nodes.findIndex(n => n.id === id)
       no.nodes.splice(index, 1)
-    },
-    buildNewSolution() {
-      const node = this.newSolution
-      var lastAuth = node ? node.auth : null
-      if (lastAuth === null) {
-        lastAuth = {
-          authByUserId: '',
-          code: 0,
-        }
-      }
-      return {
-        mode: 'new',
-        name: '',
-        description: '',
-        nodeSelect: '',
-        nodes: [],
-        auth: lastAuth,
-        loading: false,
-      }
-    },
-  },
+    }
+  }
 }
 </script>
 

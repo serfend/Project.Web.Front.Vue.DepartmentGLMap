@@ -19,6 +19,7 @@
             :loading="loading"
             @click="requireLoadWaitToAUthRegisterUsers"
           >刷新</el-button>
+          <el-switch v-model="MembersQuery.asManage" active-text="按编制单位" inactive-text="按管理单位" style="margin-left:3rem" />
         </el-form>
       </el-card>
 
@@ -86,7 +87,9 @@
           />
         </el-tab-pane>
         <el-tab-pane label="操作日志">
-          <div v-if="detail_pane=='2'">建设中</div>
+          <div v-if="detail_pane=='2'">
+            <Loading />
+          </div>
         </el-tab-pane>
       </el-tabs>
     </el-dialog>
@@ -117,11 +120,13 @@ export default {
     User,
     register,
     UserPermission,
+    Loading: () => import('@/views/Loading')
   },
   data: () => ({
     MembersQuery: {
+      asManage: false,
       pageIndex: 0,
-      pageSize: 10,
+      pageSize: 10
     },
     nowSelectRealName: '', // 通过姓名选择器选中的人员
     MembersQueryTotalCount: 0,
@@ -129,7 +134,7 @@ export default {
     current_select_id: null,
     nowSelectCompany: null,
     loading: false,
-    detail_pane: '',
+    detail_pane: ''
   }),
   computed: {
     currentUser() {
@@ -151,18 +156,18 @@ export default {
         if (!val) {
           this.current_select_id = null
         }
-      },
-    },
+      }
+    }
   },
   watch: {
     currentCmp: {
       handler(val) {
         this.nowSelectCompany = {
-          code: val,
+          code: val
         }
         this.not_login_show = !val
       },
-      immediate: true,
+      immediate: true
     },
     nowSelectCompany: {
       handler(val) {
@@ -171,7 +176,7 @@ export default {
           this.requireLoadWaitToAUthRegisterUsers()
         }
       },
-      immediate: true,
+      immediate: true
     },
     MembersQuery: {
       handler(val) {
@@ -179,8 +184,8 @@ export default {
           this.requireLoadWaitToAUthRegisterUsers()
         }
       },
-      deep: true,
-    },
+      deep: true
+    }
   },
   methods: {
     handleCurrentChange(val) {
@@ -196,26 +201,26 @@ export default {
             const item = this.waitToAuthRegisterUsers[i]
             return Promise.all([
               getUserAvatar(item.id),
-              getUsersVacationLimit(item.id),
+              getUsersVacationLimit({ userid: item.id })
             ])
               .then(([avatar, vacation]) => {
                 item.avatar = avatar.url
                 item.vacation = vacation
                 resolve()
               })
-              .catch((err) => reject(err))
+              .catch(err => reject(err))
           })
         )
       }
       await Promise.all(fn)
     },
     loadUserList(list) {
-      const result = list.map((item) => {
+      const result = list.map(item => {
         const obj = {
           userHasShow: false,
           avatar: '',
           vacation: {},
-          accountAuthStatus: checkUserValid(item.inviteBy),
+          accountAuthStatus: checkUserValid(item.inviteBy)
         }
         return Object.assign(item, obj)
       })
@@ -224,12 +229,12 @@ export default {
     // 刷新待认证人员列表
     async loadWaitToAuthRegisterUsers() {
       this.loading = true
-      getMembers({
-        code: this.nowSelectCompany.code,
-        page: this.MembersQuery.pageIndex,
-        pageSize: this.MembersQuery.pageSize,
-      })
-        .then(async (data) => {
+      const q = Object.assign(
+        { code: this.nowSelectCompany.code },
+        this.MembersQuery
+      )
+      getMembers(q)
+        .then(async data => {
           this.MembersQueryTotalCount = data.totalCount
           this.waitToAuthRegisterUsers = this.loadUserList(data.list)
           await this.loadSingleUser()
@@ -237,8 +242,8 @@ export default {
         .finally(() => {
           this.loading = false
         })
-    },
-  },
+    }
+  }
 }
 </script>
 

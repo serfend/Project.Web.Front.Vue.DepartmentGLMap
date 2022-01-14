@@ -2,7 +2,7 @@
   <div>
     <el-card>
       <div slot="header">
-        <h3>审批方案规则（筛选申请人审批方案）</h3>
+        <h3>审批方案规则（筛选申请人应使用何方案）</h3>
         <el-button
           type="success"
           icon="el-icon-refresh-right"
@@ -11,8 +11,13 @@
           @click="refresh"
         />
       </div>
-      <el-table v-loading="loading" :data="data.allSolutionRule">
+      <el-table
+        v-loading="loading"
+        :data="data.allSolutionRule"
+        :default-sort="{prop: 'priority', order: 'descending'}"
+      >
         <el-table-column
+          prop="priority"
           label="优先"
           width="80px"
           sortable
@@ -172,43 +177,44 @@
       :visible.sync="nodeDialogShow"
       :title="newRule.mode=='new'?'新增':newRule.mode=='edit'?'编辑':'删除'"
     >
-      <el-form v-loading="newRule.loading" label-width="120px">
+      <el-form v-loading="newRule.loading" label-width="8rem">
         <el-form-item label="启用">
-          <el-switch
-            v-model="newRule.enable"
-            placeholder="方案规则是否生效"
-            active-color="#13ce66"
-            inactive-color="#999999"
-          />
+          <el-tooltip content="方案规则是否生效">
+            <el-switch v-model="newRule.enable" active-color="#13ce66" inactive-color="#999999" />
+          </el-tooltip>
         </el-form-item>
         <el-form-item label="名称">
-          <el-input v-model="newRule.name" placeholder="填入独一无二的名称" style="width:400px" />
+          <el-input v-model="newRule.name" placeholder="填入独一无二的名称" class="form-input" />
         </el-form-item>
         <el-form-item label="描述">
           <el-input
             v-model="newRule.description"
-            placeholder="规则描述，可自定义"
-            style="width:400px"
+            placeholder="规则的描述，不影响规则执行"
+            class="form-input"
             type="textarea"
             autosize
           />
         </el-form-item>
         <el-form-item label="优先级">
-          <el-input-number v-model="newRule.priority" placeholder="值越大优先级越高" />
+          <el-tooltip content="值越大优先级越高">
+            <el-input-number v-model="newRule.priority" />
+          </el-tooltip>
         </el-form-item>
         <el-form-item label="方案">
-          <el-select v-model="newRule.solutionName" placeholder="满足条件时使用的审批流方案">
-            <el-option
-              v-for="item in data.allSolution"
-              :key="item.id"
-              :label="item.name"
-              :value="item.name"
-            />
-          </el-select>
+          <el-tooltip content="满足条件时使用的审批流方案">
+            <el-select v-model="newRule.solutionName" class="form-input">
+              <el-option
+                v-for="item in data.allSolution"
+                :key="item.id"
+                :label="item.name"
+                :value="item.name"
+              />
+            </el-select>
+          </el-tooltip>
         </el-form-item>
 
         <el-form-item label="单位">
-          <CompaniesSelector v-model="newRule.companies" />
+          <CompaniesSelector v-model="newRule.companies" class="form-input" />
           <el-tag
             v-for="(tag,index) in newRule.companies"
             :key="index"
@@ -218,27 +224,25 @@
           >{{ tag.name }}</el-tag>
         </el-form-item>
         <el-form-item label="长度">
-          <el-select v-model="newRule.companyCodeLength" multiple placeholder="单位代码的位数">
-            <el-option v-for="item in 10" :key="item" :label="item" :value="item" />
-          </el-select>
+          <el-tooltip content="单位代码的位数，单位代码见单位管理">
+            <el-select v-model="newRule.companyCodeLength" class="form-input" multiple>
+              <el-option v-for="item in 10" :key="item" :label="item" :value="item" />
+            </el-select>
+          </el-tooltip>
         </el-form-item>
-
         <el-form-item label="单位类型">
-          <el-select
-            v-model="newRule.companyTags"
-            multiple
-            filterable
-            allow-create
-            default-first-option
-            placeholder="单位类型选取，输入后按回车键确认"
-          />
+          <el-tooltip content="单位类型选取，输入后按回车键确认">
+            <CompanyTagSelector v-model="newRule.companyTags" class="form-input" />
+          </el-tooltip>
         </el-form-item>
         <el-form-item label="主官">
-          <el-radio-group v-model="newRule.dutyIsMajor">
-            <el-radio :label="0">不限</el-radio>
-            <el-radio :label="2">仅主官</el-radio>
-            <el-radio :label="1">仅非主官</el-radio>
-          </el-radio-group>
+          <el-tooltip content="是否是主官">
+            <el-radio-group v-model="newRule.dutyIsMajor">
+              <el-radio :label="0">不限</el-radio>
+              <el-radio :label="2">仅主官</el-radio>
+              <el-radio :label="1">仅非主官</el-radio>
+            </el-radio-group>
+          </el-tooltip>
         </el-form-item>
         <el-form-item label="职务">
           <DutiesSelector v-model="newRule.duties" />
@@ -253,17 +257,19 @@
           </div>
         </el-form-item>
         <el-form-item label="职务类型">
-          <DutiesSelector
-            :only-tag="true"
-            placeholder="职务类型选取，输入后按回车键确认"
-            @tagChange="v=>newRule.dutyTags.push(v)"
-          />
+          <el-tooltip content="筛选整个职务类型，而非职务">
+            <DutiesSelector
+              :only-tag="true"
+              class="form-input"
+              @tagChange="v=>newRule.dutyTags.indexOf(v)==-1 && newRule.dutyTags.push(v)"
+            />
+          </el-tooltip>
           <el-tag
-            v-for="(tag,index) in newRule.dutyTags"
-            :key="index"
+            v-for="tag in newRule.dutyTags"
+            :key="tag"
             closable
             :disable-transitions="false"
-            @close="newRule.dutyTags.splice(newRule.dutyTags.indexOf(tag))"
+            @close="newRule.dutyTags.splice(newRule.dutyTags.indexOf(tag),1)"
           >{{ tag }}</el-tag>
         </el-form-item>
         <el-form-item label="休假申请来源">
@@ -281,7 +287,7 @@
             @close="handleAuditMembersSelectClosed(tag)"
           >{{ tag.realName }}</el-tag>
         </el-form-item>
-        <AuthCode :form.sync="newRule.auth" />
+        <AuthCode :form.sync="newRule.auth" select-name="审批流方案编辑" />
         <el-button-group style="width:100%">
           <el-button
             v-loading="newRule.loading"
@@ -302,66 +308,76 @@
 </template>
 
 <script>
-import CompaniesSelector from '@/components/Company/CompaniesSelector'
-import DutiesSelector from '@/components/Duty/DutiesSelector'
-import AuthCode from '@/components/AuthCode'
-import CompanyFormItem from '@/components/Company/CompanyFormItem'
-import DutyFormItem from '@/components/Duty/DutyFormItem'
-import UserFormItem from '@/components/User/UserFormItem'
-import UserSelector from '@/components/User/UserSelector'
 import { formatTime } from '@/utils'
 import {
   addStreamSolutionRule,
   editStreamSolutionRule,
   deleteStreamSolutionRule,
-  buildFilter,
-} from '@/api/applyAuditStream'
+  buildFilter
+} from '@/api/audit/applyAuditStream'
 export default {
   name: 'ApplyStreamSolution',
   components: {
-    CompanyFormItem,
-    DutyFormItem,
-    UserFormItem,
-    AuthCode,
-    CompaniesSelector,
-    DutiesSelector,
-    UserSelector,
+    CompanyFormItem: () => import('@/components/Company/CompanyFormItem'),
+    CompanyTagSelector: () => import('@/components/Company/CompanyTagSelector'),
+    DutyFormItem: () => import('@/components/Duty/DutyFormItem'),
+    UserFormItem: () => import('@/components/User/UserFormItem'),
+    AuthCode: () => import('@/components/AuthCode'),
+    CompaniesSelector: () => import('@/components/Company/CompaniesSelector'),
+    DutiesSelector: () => import('@/components/Duty/DutiesSelector'),
+    UserSelector: () => import('@/components/User/UserSelector')
   },
   props: {
     data: {
       type: Object,
-      default() {
-        return {
-          companyRegion: null,
-          newCompanyRegion: null,
-          allSolutionRule: [],
-          allSolutionRuleDic: {},
-          allSolution: [],
-          allSolutionDic: {},
-          allActionNode: [],
-          allActionNodeDic: {},
-        }
+      default: () => ({
+        entityType: 'vacation',
+        companyRegion: null,
+        newCompanyRegion: null,
+        allSolutionRule: [],
+        allSolutionRuleDic: {},
+        allSolution: [],
+        allSolutionDic: {},
+        allActionNode: [],
+        allActionNodeDic: {}
+      })
+    },
+    loading: { type: Boolean, default: false }
+  },
+  data: () => ({
+    nodeDialogShow: false,
+    newRule: {
+      mode: 'new',
+      name: '',
+      description: '',
+      priority: 0,
+      enable: false,
+      solutionName: '',
+
+      duties: [],
+      dutyIsMajor: 0,
+      dutyTags: [],
+      companies: [],
+      companyRefer: '',
+      companyTags: [],
+      companyCodeLength: [],
+      auditMembersCount: 1,
+      auditMembers: [],
+      auth: {
+        authByUserId: '',
+        code: 0
       },
+      loading: false
     },
-    loading: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  data() {
-    return {
-      nodeDialogShow: false,
-      newRule: this.buildNewSolutionRule(),
-      userSelect: {},
-    }
-  },
+    userSelect: {}
+  }),
   methods: {
     format(d) {
       return formatTime(d)
     },
     checkAuditMembersIndex(id) {
       const node = this.newRule
-      const auditMembers = node.auditMembers.map((i) => i.id)
+      const auditMembers = node.auditMembers.map(i => i.id)
       return auditMembers.indexOf(id)
     },
     handleUserSelectChange(val) {
@@ -375,7 +391,7 @@ export default {
     },
     handleCompaniesSelectClose(tag) {
       const node = this.newRule
-      const companies = node.companies.map((i) => i.code)
+      const companies = node.companies.map(i => i.code)
       const code = tag.code
       node.companies.splice(companies.indexOf(code), 1)
     },
@@ -386,7 +402,7 @@ export default {
     },
     handleDutiesSelectClose(tag) {
       const node = this.newRule
-      const i = node.duties.map((i) => i.code).indexOf(tag.code)
+      const i = node.duties.map(i => i.code).indexOf(tag.code)
       node.duties.splice(i, 1)
     },
     refresh() {
@@ -400,7 +416,12 @@ export default {
       if (!auth) {
         auth = {}
       }
-      deleteStreamSolutionRule(node.name, auth.authByUserId, auth.code)
+      deleteStreamSolutionRule({
+        name: node.name,
+        authByUserId: auth.authByUserId,
+        entityType: this.data.entityTypeDesc.split('|')[0],
+        code: auth.code
+      })
         .then(() => {
           this.$message.success(`${node.name}已删除`)
           this.nodeDialogShow = false
@@ -430,17 +451,22 @@ export default {
       var fn =
         node.mode === 'edit' ? editStreamSolutionRule : addStreamSolutionRule
       const region = this.data.newCompanyRegion || {}
-      fn(
-        node.id,
-        node.name,
-        region.code,
-        node.description,
-        node.solutionName,
-        node.priority,
-        node.enable,
-        buildFilter(node),
-        node.auth
-      )
+      fn({
+        id: node.id,
+        name: node.name,
+        companyRegion: region.code,
+        description: node.description,
+        solutionName: node.solutionName,
+        priority: node.priority,
+        enable: node.enable,
+        filter: buildFilter(
+          Object.assign(
+            { entityType: this.data.entityTypeDesc.split('|')[0] },
+            node
+          )
+        ),
+        auth: node.auth
+      })
         .then(() => {
           this.$message.success(`方案规则 ${node.name}已提交`)
           this.refresh()
@@ -448,40 +474,12 @@ export default {
         .finally(() => {
           node.loading = false
         })
-    },
-    buildNewSolutionRule() {
-      const node = this.newRule
-      var lastAuth = node ? node.auth : null
-      if (lastAuth === null) {
-        lastAuth = {
-          authByUserId: '',
-          code: 0,
-        }
-      }
-      return {
-        mode: 'new',
-        name: '',
-        description: '',
-        priority: 0,
-        enable: false,
-        solutionName: '',
-
-        duties: [],
-        dutyIsMajor: 0,
-        dutyTags: [],
-        companies: [],
-        companyRefer: '',
-        companyTags: [],
-        companyCodeLength: [],
-        auditMembersCount: 1,
-        auditMembers: [],
-        auth: lastAuth,
-        loading: false,
-      }
-    },
-  },
+    }
+  }
 }
 </script>
-
-<style>
+<style lang="scss" scoped>
+.form-input {
+  width: 25rem;
+}
 </style>

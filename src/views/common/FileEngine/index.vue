@@ -1,7 +1,7 @@
 <template>
   <el-form style="justify-content:center">
-    <el-row>
-      <el-col class="row">
+    <el-row :gutter="20">
+      <el-col :span="8">
         <el-card header="文件上传">
           <el-form-item label="文件名称">
             <el-input v-model="file.fileName" />
@@ -9,14 +9,15 @@
           <el-form-item label="路径">
             <el-input v-model="file.filePath" />
           </el-form-item>
-          <AuthCode :form.sync="file.auth" />
+          <AuthCode :form.sync="file.auth" select-name="文件操作" />
           <el-form-item label="文件">
             <el-upload
               drag
               multiple
               :before-upload="beforeAvatarUpload"
+              :http-request="upload"
               :on-success="onUploadSuccess"
-              :action="uploadurl"
+              :action="''"
               :data="file"
             >
               <i class="el-icon-upload" />
@@ -27,11 +28,9 @@
             </el-upload>
           </el-form-item>
         </el-card>
-      </el-col>
-      <el-col class="row">
-        <el-card :header="nowLoadingFile">
+        <el-card :header="nowLoadingFile" style="margin-top:1rem">
           <el-form-item label="id">{{ fileInfo.id }}</el-form-item>
-          <el-form-item label="路径">{{ fileInfo.path }}</el-form-item>
+          <el-form-item label="路径">{{ fileInfo.fullPath }}</el-form-item>
           <el-form-item label="名称">{{ fileInfo.name }}</el-form-item>
           <el-form-item label="大小">{{ fileInfo.length }}</el-form-item>
           <el-form-item label="创建时间">{{ fileInfo.create }}</el-form-item>
@@ -45,7 +44,7 @@
               type="info"
               class="file-handle-btn"
               icon="el-icon-document-copy"
-              @click="clipBoard(fileInfo.id,`${fileInfo.path}_${fileInfo.name}`,$event)"
+              @click="clipBoard(fileInfo.id,`${fileInfo.fullPath}_${fileInfo.name}`,$event)"
             >复制链接</el-button>
           </div>
           <div>
@@ -55,24 +54,54 @@
               type="success"
               class="file-handle-btn"
               icon="el-icon-download"
-              @click="download(fileInfo.id,`${fileInfo.path}_${fileInfo.name}`)"
+              @click="download(fileInfo.id,`${fileInfo.fullPath}_${fileInfo.name}`)"
             >下载文件</el-button>
           </div>
           <div>
             <el-button
-              :disabled="!fileInfo.clientKey||fileInfo.clientKey.length!=36"
               :loading="fileDownloading"
               type="danger"
               class="file-handle-btn"
               icon="el-icon-delete"
-              @click="deleteFile(fileInfo.path,fileInfo.name,fileInfo.clientKey)"
-            >删除文件{{ !fileInfo.clientKey||fileInfo.clientKey.length==36?'':'(需要授权码)' }}</el-button>
+              @click="deleteFile(fileInfo.fullPath,fileInfo.name,fileInfo.clientKey)"
+            >删除文件{{ fileInfo.clientKey||fileInfo.clientKey.length==36?'':'(需要授权码)' }}</el-button>
           </div>
         </el-card>
       </el-col>
-      <el-col>
-        <el-card :header="`文件:${file.filePath}`">
-          <Explorer :path.sync="file.filePath" @select="fileSelect" />
+      <el-col :span="16">
+        <el-card>
+          <template #header style="display:flex">
+            <span
+              v-for="(path,index) in ['root'].concat(file.filePath.split('/'))"
+              :key="index"
+              style="color:#33c;cursor:pointer"
+              @click="jumpToPath(index)"
+            >{{ path }}/</span>
+            <el-button v-if="!newFolder" icon="el-icon-plus" type="text" @click="initNewFolder" />
+            <el-input
+              v-else
+              ref="newFolder"
+              v-model="newFolder"
+              size="mini"
+              style="width:10rem"
+              @keypress.native.enter="add_path"
+            >
+              <template #append>
+                <el-button
+                  icon="el-icon-circle-plus-outline"
+                  type="text"
+                  style="width:100%"
+                  @click="add_path"
+                >添加</el-button>
+              </template>
+            </el-input>
+          </template>
+          <Explorer
+            ref="explorer"
+            :query-form.sync="queryForm"
+            :path.sync="file.filePath"
+            @select="fileSelect"
+          />
         </el-card>
       </el-col>
     </el-row>
@@ -80,78 +109,101 @@
 </template>
 
 <script>
-// download,
+import { upload } from '@/api/common/file'
 import clipboard from '@/utils/clipboard'
-import AuthCode from '@/components/AuthCode'
-import Explorer from './Explorer'
-import {
-  requestFile,
-  getClientKey,
-  deleteFile,
-} from '@/api/common/file'
+import { requestFile, getClientKey, deleteFile } from '@/api/common/file'
 export default {
   name: 'FileEngine',
-  components: { AuthCode, Explorer },
-  data() {
-    return {
-      statusLoading: false,
-      file: {
-        fileName: '',
-        filePath: '',
-        auth: {
-          authByUserId: '',
-          code: '',
-        },
-      },
-      fileDownloading: false,
-      fileInfo: {
-        name: '',
-        path: '',
-        length: '',
-        create: '',
-        id: '',
-        clientKey: '',
-      },
-      uploadurl: '',
-      statusList: [],
-      lastQueryDate: new Date(),
-    }
+  components: {
+    AuthCode: () => import('@/components/AuthCode'),
+    Explorer: () => import('./Explorer')
   },
+  data: () => ({
+    statusLoading: false,
+    newFolder: null,
+    file: {
+      fileName: '',
+      filePath: '',
+      sha256: null,
+      isHidden: false,
+      userid: null,
+      auth: {
+        authByUserId: '',
+        code: ''
+      }
+    },
+    fileDownloading: false,
+    fileInfo: {
+      name: '',
+      path: '',
+      length: '',
+      create: '',
+      id: '',
+      clientKey: ''
+    },
+    queryForm: {
+      anonymous: false
+    },
+    statusList: []
+  }),
   computed: {
+    userid() {
+      const form = this.queryForm || {}
+      const userid = form.anonymous ? null : this.currentUser
+      return userid
+    },
+    currentUser() {
+      return this.$store.state.user.userid
+    },
     nowLoadingFile() {
       return `文件下载 ${this.file.filePath}/${this.file.fileName}`
-    },
+    }
   },
   watch: {
     file: {
       handler(val) {
-        var lastQueryDate = new Date()
-        this.lastQueryDate = lastQueryDate
-        setTimeout(() => {
-          if (this.lastQueryDate === lastQueryDate) {
-            this.updateFile()
-          }
-        }, 1000)
+        this.updateFile()
       },
       deep: true,
-      immediate: true,
-    },
-  },
-  mounted() {
-    this.uploadurl = process.env.VUE_APP_BASEURL + '/file/upload'
-    this.refreshStatus()
+      immediate: true
+    }
   },
   methods: {
+    upload(data) {
+      debugger
+      const f = { anonymous: this.queryForm.anonymous }
+      data.data = Object.assign(f, data.data)
+      return upload(data)
+    },
+    initNewFolder() {
+      this.newFolder = '新的文件夹'
+      this.$nextTick(() => {
+        const s = this.$refs.newFolder
+        s.select()
+      })
+    },
+    add_path() {
+      this.file.filePath = `${this.file.filePath}/${this.newFolder}`
+      this.newFolder = ''
+    },
+    jumpToPath(index) {
+      const list = this.file.filePath.split('/')
+      this.file.fileName = ''
+      this.file.filePath = list.splice(0, index).join('/')
+    },
     fileSelect(file) {
       this.file.fileName = file
     },
-    deleteFile(filepath, filename, clientkey) {
-      deleteFile(filepath, filename, clientkey).then(() => {
+    deleteFile(filepath, filename, clientKey) {
+      const { userid } = this
+      deleteFile({ userid, filepath, filename, clientKey }).then(() => {
         this.$message.success('删除成功')
       })
     },
     downloadUrl(fileId) {
-      return `${process.env.VUE_APP_BASEURL}/file/download?fileid=${fileId}`
+      return require('@/utils/website').getWebUrlPath(
+        `file/download?fileid=${fileId}`
+      )
     },
     clipBoard(fileid, fileName, event) {
       clipboard(this.downloadUrl(fileid), event).then(() => {
@@ -164,48 +216,46 @@ export default {
       a.click()
     },
     updateFile() {
-      if (!this.file || !this.file.filePath || !this.file.fileName) return
-      requestFile(this.file.filePath, this.file.fileName).then((data) => {
-        var id = data.file.id
-        data.file.clientKey = '加载中...'
+      const { file, userid } = this
+      if (!file || !file.filePath || !file.fileName) return
+
+      requestFile(Object.assign(file, { userid })).then(data => {
+        const item = data.model || data.file
+        const id = item.id
+        file.clientKey = '加载中...'
         this.$nextTick(() => {
           getClientKey(id, this.file.auth)
-            .then((ck) => {
+            .then(ck => {
               this.fileInfo.clientKey = ck
-              this.file.clientKey = ck
+              file.clientKey = ck
               this.$forceUpdate()
             })
-            .catch((e) => {
+            .catch(e => {
               this.fileInfo.clientKey = `无法加载(${e.message})`
             })
-          this.fileInfo = data.file
+          this.fileInfo = item
         })
       })
     },
     onUploadSuccess(data, status, arr) {
-      if (data.status !== 0) {
-        this.$message.error(data.message)
-      } else {
-        this.$message.success(`${status.name}上传成功`)
-      }
+      this.$message.success(`${status.name}上传成功`)
       this.refreshStatus()
       this.file.fileName = ''
     },
     beforeAvatarUpload(file) {
-      if (!this.file.filePath) this.file.filePath = 'client-sfvue'
-      this.file.fileName = file.name
-
+      debugger
+      const form = this.file
+      if (!form.filePath) this.file.filePath = 'client-sfvue'
+      form.fileName = file.name
       return true
     },
-    refreshStatus() {},
-  },
+    refreshStatus() {
+      this.$refs.explorer.refresh()
+    }
+  }
 }
 </script>
 <style scoped>
-.row {
-  width: 400px;
-  margin: 10px;
-}
 .file-handle-btn {
   width: 100%;
   margin-bottom: 1em;

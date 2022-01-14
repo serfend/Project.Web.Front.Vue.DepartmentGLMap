@@ -6,7 +6,7 @@
           <UserSelector :code.sync="userid" :default-info="currentUser.realName" />
         </el-form-item>
         <el-form-item label="授权">
-          <AuthCode :form.sync="auth" />
+          <AuthCode :form.sync="auth" select-name="家庭情况编辑" />
         </el-form-item>
       </el-form>
     </el-card>
@@ -18,7 +18,7 @@
       </template>
       <el-form>
         <UserSocial :form="social" />
-        <VacationDescriptionContent :users-vacation="vacation" />
+        <VacationDescriptionContent :users-vacation="vacation" style="margin-top:1rem" />
       </el-form>
     </el-card>
 
@@ -197,7 +197,8 @@ export default {
         })
     },
     refreshVacation() {
-      getUsersVacationLimit(this.userid).then(data => {
+      const { userid } = this
+      getUsersVacationLimit({ userid }).then(data => {
         this.vacation = data
       })
     }

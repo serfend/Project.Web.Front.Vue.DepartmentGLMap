@@ -59,7 +59,7 @@ export default {
       return `${current_origin}/#/vacation/applyDetail?id=${this.id}`
     },
     short_url() {
-      return `${process.env.VUE_APP_BASEURL}/s/${this.urlKey}`
+      return require('@/utils/website').getWebUrlPath(`/s/${this.urlKey}`)
     },
   },
   watch: {
