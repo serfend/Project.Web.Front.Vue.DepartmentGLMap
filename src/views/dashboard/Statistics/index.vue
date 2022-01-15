@@ -34,9 +34,11 @@
           </Square>
           <Square :innerstyle="{height:'auto','max-height':'20rem'}" :innerclass="['use-scroll']">
             <div slot="chart">
-              <div style="font-size:2rem;color:#fff;padding:1rem 0 0 0.5rem">当前数据</div>
+              <div style="font-size:2rem;color:#fff;padding:1rem 0 0 0.5rem">
+                <span>当前数据</span>
+              </div>
               <div class="menu-divider" style="margin:0.3rem 0 0.3rem 0" />
-              <CommonStatistics v-model="filtered_data" />
+              <CommonStatistics v-model="filtered_data" :full-data="field_data" />
             </div>
           </Square>
         </div>
