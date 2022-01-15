@@ -1,11 +1,13 @@
 <template>
   <div class="search-form">
-    <MagicForm v-model="magic_model" />
+    <MagicForm v-model="magic_model" :form-attrs="{'label-width':'5rem'}" />
   </div>
 </template>
 
 <script>
-import { arrayToTree } from '@/utils'
+import { arrayToDict } from '@/utils'
+import { getProp } from '@/utils/data-handle'
+
 import conver_component_type from './conver_component_type'
 export default {
   name: 'CommonSearch',
@@ -15,49 +17,101 @@ export default {
   props: {
     fields: { type: Array, default: () => [] },
     data: { type: Array, default: () => [] },
-    type: { type: String, default: 'filter' } // filter/query
+    type: { type: String, default: 'filter' }, // filter/query
   },
   data: () => ({
     magic_model: {}
   }),
-  computed: {},
+  computed: {
+    enable_fields() {
+      const fields = this.fields
+      const type = this.type
+      if (!fields || !type) return []
+      const result = fields.filter(i => i[`${type}_enable`]) || []
+      const v = this.magic_model
+      return result.map(i => {
+        const value = getProp(v, [i.name])
+        const t = Object.assign({ value }, i)
+        return t
+      })
+    }
+  },
   watch: {
     fields: {
       handler() {
-        this.getFilters()
+        this.$nextTick(() => {
+          this.initSettingModel()
+        })
       },
       deep: true,
       immediate: true
+    },
+    magic_model: {
+      handler(val) {
+        this.$emit('filterChange')
+      },
+      deep: true
     }
   },
   methods: {
-    doFilter(list) {
-    },
-    getFilters() {
-      const fields = this.fields
-      const type = this.type
-      const enable_fields = fields.filter(i => i[`${type}_enable`])
-      const result = {}
-      enable_fields.map(i => {
-        result[i.name] = {
-          label: i.alias,
-          __setting: {
-            default: [],
-            dictionary: arrayToTree(i.values),
-            type: conver_component_type[i.type] || i.type
-          },
-          value: {
-
+    // 根据当前筛选条件筛选出符合项
+    doFilter() {
+      const fields = this.enable_fields
+      let result = this.data
+      const item_value = (i, field) => {
+        const value = i && i.extend_fields[field]
+        return (value && value.v) || value
+      }
+      fields.map(i => {
+        const { value, id, type } = i
+        if (!value) return
+        switch (type) {
+          case 'BaseSelect': {
+            if (!value.length) return
+            const filter_value_merge = value.reduce((prev, cur) => prev + cur, 0)
+            result = result.filter(d => Number(filter_value_merge) & Number(item_value(d, id)))
+            break
+          }
+          case 'el-input': {
+            result = result.filter(d => {
+              const v = item_value(d, id)
+              return v && v.indexOf(value) > -1
+            })
+            break
+          }
+          default: {
+            console.warn('invalid filter type', type)
+            break
           }
         }
       })
-      debugger
+      return result
+    },
+    initSettingModel() {
+      const result = {}
+      this.enable_fields.map(i => {
+        result[i.name] = {
+          label: i.alias,
+          type: conver_component_type[i.type] || i.type,
+          __setting: {
+            default: i.default,
+            props: {
+              types: i.values,
+              dictionary: arrayToDict(i.values, i => i.value || i),
+              config: {},
+              multi: true
+            }
+          },
+          value: null
+        }
+      })
+      this.magic_model = result
     }
   }
 }
 </script>
 <style lang="scss" scoped>
 .search-form{
-	padding:0.5rem 0 0 0.5rem;
+	padding:1rem 1rem 0 0.5rem;
 }
 </style>
