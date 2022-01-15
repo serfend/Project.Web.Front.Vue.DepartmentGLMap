@@ -59,7 +59,8 @@
       "id": "4",
       "name": "further_info",
       "alias": "详细信息",
-      "type": "el-input"
+      "type": "el-input",
+      "hidden": true
     },
     {
       "id": "5",
