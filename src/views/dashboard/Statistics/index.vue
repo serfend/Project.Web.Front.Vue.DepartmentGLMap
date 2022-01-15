@@ -26,7 +26,7 @@
             <div slot="chart">
               <div style="font-size:2rem;color:#fff;padding:1rem 0 0 0.5rem">
                 <span>筛选字段</span>
-                <el-button :disabled="!canRefresh" type="text" @click="doRefreshFilter">刷新</el-button>
+                <el-button :disabled="!canRefresh" :class="['btn-refresh',canRefresh?'active':'']" type="text" @click="doRefreshFilter">有新数据 点击刷新</el-button>
               </div>
               <div class="menu-divider" style="margin:0.3rem 0 0.3rem 0" />
               <CommonFilter ref="commonFilter" v-model="filter" :fields="field_list" :data="field_data" @filterChange="canRefresh = true" />
@@ -171,6 +171,27 @@ export default {
   position: fixed;
   top: 0;
   right: 0;
+}
+.btn-refresh{
+  transition: all ease 0.5s;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+  font-size: 1.5rem;
+  &:hover{
+    color:#00ff2a;
+  }
+  opacity: 0.1;
+  &.active{
+    animation:flashing-opacity 1s infinite;
+  }
+}
+@keyframes flashing-opacity
+{
+    0% {opacity: 1;}
+    50% {
+      opacity: 0;
+      transform: translateX(1rem);
+    }
+    100% {opacity: 1;}
 }
 </style>
 <style lang="scss">
