@@ -1,5 +1,5 @@
 <template>
-  <el-select v-model="inner_value" :multiple="multi" clearable collapse-tags>
+  <el-select v-model="inner_value" :multiple="multi" clearable>
     <el-option
       v-for="(item) in types.filter(i=>i.value>=valueRange[0] && i.value<=valueRange[1])"
       :key="item.id"
