@@ -20,7 +20,7 @@ export default {
     type: { type: String, default: 'filter' }, // filter/query
   },
   data: () => ({
-    magic_model: {}
+    magic_model: null
   }),
   computed: {
     data_filter_ready() {
@@ -31,12 +31,7 @@ export default {
       const type = this.type
       if (!fields || !type) return []
       const result = fields.filter(i => i[`${type}_enable`]) || []
-      const v = this.magic_model
-      return result.map(i => {
-        const value = getProp(v, [i.name])
-        const t = Object.assign({ value }, i)
-        return t
-      })
+      return result
     }
   },
   watch: {
@@ -52,7 +47,7 @@ export default {
         this.$emit('filterChange')
       }, immediate: true
     },
-    fields: {
+    enable_fields: {
       handler(v) {
         if (!v) return
         this.$nextTick(() => {
@@ -66,8 +61,13 @@ export default {
   methods: {
     // 根据当前筛选条件筛选出符合项
     doFilter() {
-      const fields = this.enable_fields
       let result = this.data
+      const v = this.magic_model
+      const fields = this.enable_fields.map(i => {
+        const value = getProp(v, [i.name])
+        const t = Object.assign({ value }, i)
+        return t
+      })
       // console.log('current enable fields', fields)
       fields.map(i => {
         const { value, id, type } = i

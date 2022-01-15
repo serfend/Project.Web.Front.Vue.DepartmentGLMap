@@ -78,6 +78,7 @@ export default {
   watch: {
     innerData: {
       handler(val) {
+        console.log('magic form data modified', val)
         this.$nextTick(() => {
           this.updateValue()
         })
@@ -93,7 +94,7 @@ export default {
     },
     data: {
       handler(val) {
-        if (this.innerData) return
+        console.log('magic form data=>', val)
         this.loading = true
         val = val || {}
         if (val.__setting) {

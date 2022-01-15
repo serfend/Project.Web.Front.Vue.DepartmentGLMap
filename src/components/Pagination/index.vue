@@ -17,7 +17,7 @@
 
 <script>
 import { scrollTo } from '@/utils/scroll-to'
-
+const default_setting = () => ({ pageIndex: 1, pageSize: 10, totalCount: 0 })
 export default {
   name: 'Pagination',
   props: {
@@ -44,20 +44,22 @@ export default {
     hidden: { type: Boolean, default: false },
     small: { type: Boolean, default: false }
   },
-  data() {
-    return {
-      innerPages: { pageIndex: 1, pageSize: 10, totalCount: 0 }
-    }
-  },
+  data: () => ({ innerPages: default_setting() }),
   watch: {
     pagesetting: {
       handler(val) {
-        this.innerPages.pageIndex = val.pageIndex + 1
-        this.innerPages.pageSize = val.pageSize
+        if (!val)val = default_setting()
+        this.innerPages.pageIndex = (val.pageIndex || 0) + 1
+        this.innerPages.pageSize = val.pageSize || 10
       },
       deep: true,
       immediate: true
     }
+  },
+  mounted() {
+    setTimeout(() => {
+      this.handleChange()
+    })
   },
   methods: {
     handleSizeChange(val) {
