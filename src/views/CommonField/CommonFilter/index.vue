@@ -7,7 +7,7 @@
 <script>
 import { arrayToDict } from '@/utils'
 import { getProp } from '@/utils/data-handle'
-
+import { data_compare } from './data_compare'
 import conver_component_type from './conver_component_type'
 export default {
   name: 'CommonSearch',
@@ -40,6 +40,12 @@ export default {
     }
   },
   watch: {
+    magic_model: {
+      handler(val) {
+        if (!val || !this.data_filter_ready) return
+        this.$emit('filterChange')
+      }
+    },
     data_filter_ready: {
       handler(val) {
         if (!val) return
@@ -62,33 +68,11 @@ export default {
     doFilter() {
       const fields = this.enable_fields
       let result = this.data
-      const item_value = (i, field) => {
-        const value = i && i.extend_fields[field]
-        return (value && value.v) || value
-      }
       // console.log('current enable fields', fields)
       fields.map(i => {
         const { value, id, type } = i
         if (!value) return
-        switch (type) {
-          case 'BaseSelect': {
-            if (!value.length) return
-            const filter_value_merge = value.reduce((prev, cur) => prev + cur, 0)
-            result = result.filter(d => Number(filter_value_merge) & Number(item_value(d, id)))
-            break
-          }
-          case 'el-input': {
-            result = result.filter(d => {
-              const v = item_value(d, id)
-              return v && v.indexOf(value) > -1
-            })
-            break
-          }
-          default: {
-            console.warn('invalid filter type', type)
-            break
-          }
-        }
+        result = data_compare({ list: result, id, type, value })
       })
       return result
     },
