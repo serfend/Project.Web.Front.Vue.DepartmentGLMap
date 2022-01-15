@@ -20,6 +20,7 @@ export default {
   data: () => ({
     chart: null,
     series: [],
+    lastSeriersDict: {}, // 用于记录上次的系列，避免出现空序列导致不刷新的情况
     rootLoading: false
   }),
   computed: {
@@ -145,10 +146,18 @@ export default {
     },
     refreshData() {
       const series = this.series
-      console.log('series', series)
-      this.chart.setOption({
-        series: series
+      const lastSeriersDict = this.lastSeriersDict
+      series.map(i => {
+        delete lastSeriersDict[i.name]
       })
+      const to_empty = Object
+        .keys(lastSeriersDict)
+        .map(alias => build_scatter({ group: { alias }}))
+      this.chart.setOption({
+        series: series.concat(to_empty)
+      })
+      this.lastSeriersDict = arrayToDict(series, i => i.name)
+      console.log('series to_empty lastSeriersDict', series, to_empty, this.lastSeriersDict)
     },
     initChartSkeleton() {
       const titleStyle = {
