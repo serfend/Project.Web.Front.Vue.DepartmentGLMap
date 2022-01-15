@@ -60,7 +60,8 @@ export default {
     TimeCenter: () => import('./components/NumberCounter/TimeCenter'),
     SettingEngine: () => import('./components/Engine/SettingEngine'),
     VacationMap3D: () => import('./components/Geo/VacationMap3D'),
-    CommonFilter: () => import('@/views/CommonField/CommonFilter')
+    CommonFilter: () => import('@/views/CommonField/CommonFilter'),
+    CommonStatistics: () => import('@/views/CommonField/CommonStatistics')
   },
   data: () => ({
     loading: false,
@@ -69,7 +70,8 @@ export default {
     show_only_map: false,
     filter: {},
     filtered_data: [],
-    canRefresh: false
+    canRefresh: false,
+    firstRefresh: true
   }),
   computed: {
     field_data() {
@@ -89,6 +91,17 @@ export default {
       }
     },
   },
+  watch: {
+    canRefresh: {
+      handler(v) {
+        if (!v) return
+        if (!this.firstRefresh) return
+        this.firstRefresh = false
+        this.doRefreshFilter()
+      },
+      immediate: true
+    },
+  },
   mounted () {
     setTimeout(() => {
       this.init()
@@ -99,11 +112,13 @@ export default {
   },
   methods: {
     timeZone,
+    settingUpdated(v) {},
     doRefreshFilter() {
       this.loading = true
       this.canRefresh = false
       const result = this.$refs.commonFilter.doFilter()
-      this.filtered_data = { default: result }
+      // console.log('refresh load data', result)
+      this.filtered_data = result
       setTimeout(() => { this.loading = false }, 1e3)
     },
     requireUpdateItems (items) {
