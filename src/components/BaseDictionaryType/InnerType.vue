@@ -7,7 +7,7 @@
 
 <script>
 export default {
-  name: 'BaseDictionaryType',
+  name: 'BaseDictionaryInnerType',
   model: {
     prop: 'type',
     event: 'change'
