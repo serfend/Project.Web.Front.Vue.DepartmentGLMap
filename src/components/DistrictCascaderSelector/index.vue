@@ -14,6 +14,13 @@ export default {
   components: {
     CascaderSelector: () => import('@/components/CascaderSelector')
   },
+  model: {
+    prop: 'value',
+    event: 'change'
+  },
+  props: {
+    value: { type: Object, default: null }
+  },
   data: () => ({
     district: null
   }),
@@ -26,6 +33,11 @@ export default {
     },
     location_dict() {
       return this.locations && this.locations.locations
+    }
+  },
+  watch: {
+    district(v) {
+      this.$emit('change', v)
     }
   },
   methods: {
