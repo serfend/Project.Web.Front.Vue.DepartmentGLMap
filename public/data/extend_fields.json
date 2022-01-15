@@ -1,42 +1,75 @@
 {
-	"list":[
-		{
-			"id":"1",
-			"name":"id",
-			"alias":"标识序号",
-			"type":"string",
-			"query_enable":true,
-			"filter_enable":true
-		},
-		{
-			"id":"2",
-			"name":"place",
-			"alias":"地区",
-			"type":"BaseSelect",
-			"type_config":{
-				"multi":true
-			},
-			"values":["东部","南部","西部","北部","中部"],
-			"query_enable":true,
-			"filter_enable":true
-		},
-		{
-			"id":"3",
-			"name":"level",
-			"alias":"级别",
-			"type":"BaseSelect",
-			"type_config":{
-				"multi":true
-			},
-			"query_enable":true,
-			"filter_enable":true,
-			"values":["U","S","J"]
-		},
-		{
-			"id":"4",
-			"name":"further_info",
-			"alias":"详细信息",
-			"type":"el-input"
-		}
-	]
+  "list": [
+    {
+      "id": "1",
+      "name": "id",
+      "alias": "标识序号",
+      "type": "el-input",
+      "query_enable": true,
+      "filter_enable": true
+    },
+    {
+      "id": "2",
+      "name": "place",
+      "alias": "地区",
+      "type": "BaseSelect",
+      "type_config": {
+        "multi": true
+      },
+      "values": [
+        {
+          "alias": "东部",
+          "id": 1,
+          "value": 1,
+          "description": "东部",
+          "color": "#f00"
+        },
+        { "alias": "南部", "id": 2, "value": 2 },
+        { "alias": "西部", "id": 3, "value": 4 },
+        { "alias": "北部", "id": 4, "value": 8 },
+        { "alias": "中部", "id": 5, "value": 16 }
+      ],
+      "query_enable": true,
+      "filter_enable": true
+    },
+    {
+      "id": "3",
+      "name": "level",
+      "alias": "级别",
+      "type": "BaseSelect",
+      "type_config": {
+        "multi": true
+      },
+      "query_enable": true,
+      "filter_enable": true,
+      "values": [
+        {
+          "alias": "J",
+          "id": 1,
+          "value": 1,
+          "description": "J级",
+          "color": "#f00",
+          "size": 20
+        },
+        { "alias": "S", "id": 2, "value": 2, "size": 16 },
+        { "alias": "U", "id": 3, "value": 4, "size": 12 }
+      ]
+    },
+    {
+      "id": "4",
+      "name": "further_info",
+      "alias": "详细信息",
+      "type": "el-input"
+    },
+    {
+      "id": "5",
+      "name": "admin_division",
+      "alias": "行政区划",
+      "type": "BaseAdminDivision",
+      "filter_enable": true
+    }
+  ],
+  "color_field": 3,
+  "size_field": 3,
+  "division_field": 5
 }
