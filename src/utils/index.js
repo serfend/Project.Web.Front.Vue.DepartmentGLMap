@@ -508,3 +508,12 @@ export function arrayToTree(array, idFunc, parentIdFunc) {
   })
   return root
 }
+export function arrayToDict(array, idFunc) {
+  idFunc = idFunc || ((a) => a.id)
+  if (!array)array = []
+  const result = {}
+  array.map(i => {
+    result[idFunc(i)] = i
+  })
+  return result
+}
