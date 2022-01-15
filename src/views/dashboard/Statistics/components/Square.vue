@@ -1,5 +1,5 @@
 <template class="mainbox">
-  <div class="panel">
+  <div class="panel" :style="innerstyle" :class="innerclass">
     <div class="h2-title">
       <slot name="title" />
     </div>
@@ -10,7 +10,11 @@
 
 <script>
 export default {
-  name: 'Square'
+  name: 'Square',
+  props: {
+    innerstyle: { type: Object, default: () => {} },
+    innerclass: { type: [Object, Array], default: () => {} },
+  }
 }
 </script>
 
