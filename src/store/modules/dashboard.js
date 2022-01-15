@@ -27,7 +27,7 @@ const actions = {
     return new Promise((res, rej) => {
       if (state.locations) return res(state.locations)
       loadLocations().then(data => {
-        state.loadLocations = data
+        state.locations = data
         return res(data)
       }).catch(e => rej(e))
     })
