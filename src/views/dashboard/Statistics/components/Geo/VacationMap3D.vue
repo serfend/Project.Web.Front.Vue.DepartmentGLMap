@@ -1,5 +1,5 @@
 <template>
-  <div :style="{height:height,width:width}" />
+  <div v-waves :style="{height:height,width:width}" />
 </template>
 
 <script>
@@ -7,8 +7,12 @@ import * as echarts from 'echarts'
 import 'echarts-gl'
 import { build_scatter } from '../../js/scatter'
 import { arrayToDict } from '@/utils'
+import waves from '@/directive/waves'
 export default {
   name: 'VacationMap3D',
+  directives: {
+    waves
+  },
   props: {
     width: { type: String, default: '100%' },
     height: { type: String, default: '800px' },
@@ -220,6 +224,14 @@ export default {
           },
           center: [100, 35],
           zoom: 3
+        },
+        legend: {
+          type: 'scroll',
+          top: '10%',
+          right: '10%',
+          textStyle: {
+            color: '#fff'
+          }
         },
         series: []
       }
