@@ -3,7 +3,7 @@ import { arrayToDict } from '@/utils'
 import store from '@/store'
 export function build_scatter({ data, group }) {
   const r = {
-    type: 'scatter',
+    type: 'effectScatter',
     coordinateSystem: 'geo',
     name: group.alias,
     data,
@@ -16,7 +16,11 @@ export function build_scatter({ data, group }) {
       shadowBlur: 10,
       shadowColor: '#333'
     },
-    emphasis: { scale: true },
+    blur: {
+      labelLine: {
+        show: true
+      }
+    },
     zlevel: 1
   }
   if (group.color)r.itemStyle.color = group.color

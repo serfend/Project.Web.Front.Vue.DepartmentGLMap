@@ -1,5 +1,5 @@
 <template class="mainbox">
-  <div class="panel" :style="innerstyle" :class="innerclass">
+  <div v-waves class="panel" :style="innerstyle" :class="innerclass">
     <div class="h2-title">
       <slot name="title" />
     </div>
@@ -9,8 +9,12 @@
 </template>
 
 <script>
+import waves from '@/directive/waves'
 export default {
   name: 'Square',
+  directives: {
+    waves
+  },
   props: {
     innerstyle: { type: Object, default: () => {} },
     innerclass: { type: [Object, Array], default: () => {} },
