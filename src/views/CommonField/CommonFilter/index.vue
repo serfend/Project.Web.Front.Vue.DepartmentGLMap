@@ -23,6 +23,9 @@ export default {
     magic_model: {}
   }),
   computed: {
+    data_filter_ready() {
+      return !!(this.data && this.fields && this.magic_model)
+    },
     enable_fields() {
       const fields = this.fields
       const type = this.type
@@ -37,20 +40,21 @@ export default {
     }
   },
   watch: {
+    data_filter_ready: {
+      handler(val) {
+        if (!val) return
+        this.$emit('filterChange')
+      }, immediate: true
+    },
     fields: {
-      handler() {
+      handler(v) {
+        if (!v) return
         this.$nextTick(() => {
           this.initSettingModel()
         })
       },
       deep: true,
       immediate: true
-    },
-    magic_model: {
-      handler(val) {
-        this.$emit('filterChange')
-      },
-      deep: true
     }
   },
   methods: {
@@ -62,6 +66,7 @@ export default {
         const value = i && i.extend_fields[field]
         return (value && value.v) || value
       }
+      // console.log('current enable fields', fields)
       fields.map(i => {
         const { value, id, type } = i
         if (!value) return
@@ -88,6 +93,7 @@ export default {
       return result
     },
     initSettingModel() {
+      // console.log('initSettingModel')
       const result = {}
       this.enable_fields.map(i => {
         result[i.name] = {
