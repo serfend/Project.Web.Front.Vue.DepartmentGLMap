@@ -6,7 +6,7 @@
 import * as echarts from 'echarts'
 import 'echarts-gl'
 import { build_scatter } from '../../js/scatter'
-import { debounce, arrayToDict } from '@/utils'
+import { arrayToDict } from '@/utils'
 export default {
   name: 'VacationMap3D',
   props: {
@@ -14,7 +14,7 @@ export default {
     height: { type: String, default: '800px' },
     speed: { type: Number, default: 1 },
     color: { type: Array, default: () => [] },
-    data: { type: Object, default: () => {} },
+    data: { type: Array, default: () => [] },
     loading: { type: Boolean, default: false }
   },
   data: () => ({
@@ -23,8 +23,13 @@ export default {
     rootLoading: false
   }),
   computed: {
+    dict_ready() {
+      const { prop_dict, location_dict, fields_dict } = this
+      return !!(prop_dict && location_dict && fields_dict)
+    },
     fields_prop() {
-      return this.$store.state.common_fields
+      const f = this.$store.state.common_fields
+      return f && f.fields
     },
     fields_dict() {
       const f = this.fields_prop
@@ -32,14 +37,15 @@ export default {
     },
     prop_dict() {
       const f = this.fields_prop
-      const l = this.fields_list
-      if (!f || !l) return []
-      const c = f && f.color_field
-      const s = f && f.size_field
-      return [c, s]
+      if (!f) return []
+      const c = f.color_field
+      const s = f.size_field
+      const d = f.division_field
+      return [c, s, d]
     },
     location_dict() {
-      return this.$store.state.dashboard.locations
+      const d = this.$store.state.dashboard.locations
+      return d && d.locations
     },
     innerLoading: {
       get() { return this.rootLoading },
@@ -48,32 +54,32 @@ export default {
         else this.chart.hideLoading()
         this.rootLoading = val
       }
-    },
-    updatedData() {
-      return debounce(() => {
-        this.updateData()
-      }, 100)
     }
   },
   watch: {
+    series: {
+      handler(val) {
+        this.refresh()
+      },
+      deep: true
+    },
+    dict_ready(v) {
+      if (!v) return
+      this.updateData()
+    },
     loading(val) {
       this.innerLoading = val
     },
     data: {
       handler(v) {
-        this.$nextTick(() => {
-          this.updatedData()
-        })
+        if (!v) return
+        this.updateData()
       },
-      deep: true,
-      immediate: true
+      deep: true
     }
   },
   mounted() {
     this.initChart()
-    setTimeout(() => {
-      this.refresh()
-    }, 1e3)
   },
   beforeDestroy() {
     if (!this.chart) {
@@ -92,32 +98,54 @@ export default {
       })
     },
     async refresh() {
+      console.log('refresh is call')
       this.innerLoading = true
       this.refreshData()
       this.innerLoading = false
     },
     updateData() {
+      if (!this.dict_ready || !this.data) return
+      const { prop_dict, location_dict, fields_dict } = this
+      const [color_prop, size_prop, division_field] = prop_dict
+      const color_prop_value = fields_dict[color_prop] && fields_dict[color_prop].values_dict
+      const size_prop_value = fields_dict[size_prop] && fields_dict[size_prop].values_dict
+
       const convertData = (data) => {
-        debugger
+        const fields = data.extend_fields
+        if (!fields) return null
+        const l = fields[division_field]
+        const district = l && location_dict[l]
+        const location = district && district.location
+        if (!location) return null
+        const p_color = fields[color_prop]
+        const p_size = fields[size_prop]
         return {
-          name: data.name,
-          value: [116, 28, data.value]
+          name: data.alias,
+          value: [
+            ...location,
+            (size_prop_value[p_size] && size_prop_value[p_size].size) || p_size,
+            color_prop_value[p_color] || p_color,
+            fields
+          ]
         }
       }
-      const series = Object.keys(this.data)
-
-      const groupList = series.map(list_key => {
-        const list = this.data[list_key].map(convertData)
-        const t = build_scatter(list)
+      const dict = {}
+      const list = this.data.map(convertData).filter(i => i)
+      list.map(i => {
+        const item = i.value[3] // 分组
+        const key = item.alias || item
+        if (!dict[key])dict[key] = { group: item, data: [] }
+        dict[key].data.push(i)
+      })
+      this.series = Object.keys(dict).map(key => {
+        const { data, group } = dict[key]
+        const t = build_scatter({ data, group })
         return t
       })
-
-      this.series = groupList
-      this.refresh()
     },
     refreshData() {
       const series = this.series
-      console.log(series)
+      console.log('series', series)
       this.chart.setOption({
         series: series
       })
