@@ -44,14 +44,14 @@ export default {
         lazyLoad(node, callback) {
           if (node.root) node.value = 'root'
           this.getChild(node.value).then(data => {
-            var list = data.list
+            const list = data.list
             const nodes = Array.from(list).map(item => ({
-              value: item.code + '',
+              value: `${item.code}`,
               label: item.name,
               leaf: false
             }))
             callback(nodes)
-          })
+          }).catch(e => { callback([]) })
         }
       }
     }

@@ -1,27 +1,23 @@
 <template>
-  <el-form>
-    <el-collapse>
-      <el-form-item v-for="i in innerData" :key="i.key" :label="i.label">
-        <el-collapse-item>
-          <el-tooltip slot="title" content="启用后将跟随父级默认值">
-            <el-switch
-              v-if="i.__setting&&i.__setting.useParent!==undefined"
-              v-model="i.__setting.useParent"
-            />
-          </el-tooltip>
-          <el-form-item v-if="i.__setting&&i.__setting.type" label="默认值">
-            <component :is="i.__setting.type" v-model="i.__setting.default" />
-          </el-form-item>
-          <component
-            :is="i.type"
-            v-show="!i.__setting||(i.__setting&&!i.__setting.useParent)"
-            v-model="i.value"
-            :alias="i.key"
-            v-bind="i.__setting&&i.__setting.props?i.__setting.props:$props"
-          />
-        </el-collapse-item>
+  <el-form v-bind="formAttrs">
+    <el-form-item v-for="i in innerData" :key="i.key" :label="i.label">
+      <el-tooltip slot="title" content="启用后将跟随父级默认值">
+        <el-switch
+          v-if="i.__setting&&i.__setting.useParent!==undefined"
+          v-model="i.__setting.useParent"
+        />
+      </el-tooltip>
+      <el-form-item v-if="i.__setting&&i.__setting.type" label="默认值">
+        <component :is="i.__setting.type" v-model="i.__setting.default" />
       </el-form-item>
-    </el-collapse>
+      <component
+        :is="i.type"
+        v-show="!i.__setting||(i.__setting&&!i.__setting.useParent)"
+        v-model="i.value"
+        :alias="i.key"
+        v-bind="i.__setting&&i.__setting.props?i.__setting.props:$props"
+      />
+    </el-form-item>
   </el-form>
 </template>
 
@@ -66,7 +62,8 @@ export default {
     alias: { type: String, default: null },
     // leaf node will not emit change when setting modify
     // only root node will
-    isLeafNode: { type: Boolean, default: false }
+    isLeafNode: { type: Boolean, default: false },
+    formAttrs: { type: Object, default: () => {} }
   },
   data: () => ({
     innerData: null,
