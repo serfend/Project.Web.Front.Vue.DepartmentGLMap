@@ -1,5 +1,10 @@
 {
-  
+  "home":{
+    "title":"主页"
+  },
+  "defaultSearchView":{
+    "title":"详细列表"
+  },
   "data-center": {
     "title":"数据中心",
     "description": "流量设备集群管理",

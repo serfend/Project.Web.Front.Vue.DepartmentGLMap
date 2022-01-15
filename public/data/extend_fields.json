@@ -6,7 +6,8 @@
       "alias": "标识序号",
       "type": "el-input",
       "query_enable": true,
-      "filter_enable": true
+      "filter_enable": true,
+      "show_enable": true
     },
     {
       "id": "2",
@@ -30,7 +31,8 @@
         { "alias": "中部", "id": 5, "value": 16 }
       ],
       "query_enable": true,
-      "filter_enable": true
+      "filter_enable": true,
+      "show_enable": true
     },
     {
       "id": "3",
@@ -42,6 +44,7 @@
       },
       "query_enable": true,
       "filter_enable": true,
+      "show_enable": true,
       "values": [
         {
           "alias": "J",
@@ -67,6 +70,7 @@
       "name": "admin_division",
       "alias": "行政区划",
       "type": "BaseAdminDivision",
+      "show_enable": true,
       "filter_enable": true
     }
   ],
