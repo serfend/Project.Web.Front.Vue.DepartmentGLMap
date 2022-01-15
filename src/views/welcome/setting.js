@@ -19,7 +19,7 @@ export const default_pages = [
     description: 'warning.description',
     // icon: '/favicon.png',
     svg: 'anquan',
-    href: '#/home/warning',
+    href: '#/home/defaultSearchView',
   },
   {
     label: 'dashboard.title',

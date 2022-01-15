@@ -44,6 +44,15 @@ export default {
         title: 'warning.title',
         icon: 'anquan'
       }
+    },
+    {
+      path: 'defaultSearchView',
+      component: () => import('@/views/CommonField/DefaultSearchView'),
+      name: 'defaultSearchView',
+      meta: {
+        title: 'defaultSearchView.title',
+        icon: 'anquan'
+      }
     }
   ]
 }
