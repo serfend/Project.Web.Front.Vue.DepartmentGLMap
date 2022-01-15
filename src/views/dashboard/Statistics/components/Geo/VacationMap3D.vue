@@ -6,7 +6,7 @@
 import * as echarts from 'echarts'
 import 'echarts-gl'
 import { build_scatter } from '../../js/scatter'
-import { debounce } from '@/utils'
+import { debounce, arrayToDict } from '@/utils'
 export default {
   name: 'VacationMap3D',
   props: {
@@ -14,15 +14,41 @@ export default {
     height: { type: String, default: '800px' },
     speed: { type: Number, default: 1 },
     color: { type: Array, default: () => [] },
-    data: { type: Object, default: () => {} }
+    data: { type: Object, default: () => {} },
+    loading: { type: Boolean, default: false }
   },
-  data() {
-    return {
-      chart: null,
-      series: []
-    }
-  },
+  data: () => ({
+    chart: null,
+    series: [],
+    rootLoading: false
+  }),
   computed: {
+    fields_prop() {
+      return this.$store.state.common_fields
+    },
+    fields_dict() {
+      const f = this.fields_prop
+      return arrayToDict(f && f.list)
+    },
+    prop_dict() {
+      const f = this.fields_prop
+      const l = this.fields_list
+      if (!f || !l) return []
+      const c = f && f.color_field
+      const s = f && f.size_field
+      return [c, s]
+    },
+    location_dict() {
+      return this.$store.state.dashboard.locations
+    },
+    innerLoading: {
+      get() { return this.rootLoading },
+      set(val) {
+        if (val) this.chart.showLoading()
+        else this.chart.hideLoading()
+        this.rootLoading = val
+      }
+    },
     updatedData() {
       return debounce(() => {
         this.updateData()
@@ -30,6 +56,9 @@ export default {
     }
   },
   watch: {
+    loading(val) {
+      this.innerLoading = val
+    },
     data: {
       handler(v) {
         this.$nextTick(() => {
@@ -63,12 +92,13 @@ export default {
       })
     },
     async refresh() {
-      this.chart.showLoading()
+      this.innerLoading = true
       this.refreshData()
-      this.chart.hideLoading()
+      this.innerLoading = false
     },
     updateData() {
       const convertData = (data) => {
+        debugger
         return {
           name: data.name,
           value: [116, 28, data.value]

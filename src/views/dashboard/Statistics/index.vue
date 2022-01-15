@@ -6,7 +6,7 @@
       class="on-right-menu"
       @click="show_only_map = !show_only_map"
     >{{ show_only_map ? "取消全屏" : "全屏" }}</el-button>
-    <div v-if="!show_only_map" v-loading="loading" class="container-bg">
+    <div v-if="!show_only_map" class="container-bg">
       <div class="statistics-title">
         <h1 class="content" style="margin:0.1rem">{{ $t('dash.t.title') }}</h1>
         <TimeCenter :time-sync-method="timeZone" />
@@ -18,29 +18,40 @@
             <div class="map1" />
             <div class="map2" />
             <div class="map3" />
-            <VacationMap3D height="100%" :data="default_map_data" />
+            <VacationMap3D :loading="loading" height="100%" :data="filtered_data" />
           </div>
         </div>
         <div class="column">
-          <Square>
-            <CommonFilter slot="chart" v-model="filter" :fields="field_list" :data="field_data" />
+          <Square :innerstyle="{height:'auto','max-height':'20rem'}" :innerclass="['use-scroll']">
+            <div slot="chart">
+              <div style="font-size:2rem;color:#fff;padding:1rem 0 0 0.5rem">
+                <span>筛选字段</span>
+                <el-button :disabled="!canRefresh" type="text" @click="doRefreshFilter">刷新</el-button>
+              </div>
+              <div class="menu-divider" style="margin:0.3rem 0 0.3rem 0" />
+              <CommonFilter ref="commonFilter" v-model="filter" :fields="field_list" :data="field_data" @filterChange="canRefresh = true" />
+            </div>
           </Square>
-          <Square>1</Square>
+          <Square :innerstyle="{height:'auto','max-height':'20rem'}" :innerclass="['use-scroll']">
+            <div slot="chart">
+              <div style="font-size:2rem;color:#fff;padding:1rem 0 0 0.5rem">当前数据</div>
+              <div class="menu-divider" style="margin:0.3rem 0 0.3rem 0" />
+              <CommonStatistics v-model="filtered_data" />
+            </div>
+          </Square>
         </div>
       </section>
       <div class="on-right-menu">
         <SettingEngine ref="setting" :setting.sync="setting" @closed="settingUpdated" />
       </div>
     </div>
-    <VacationMap3D v-else height="87%" :data="default_map_data" />
+    <VacationMap3D v-else :loading="loading" height="87%" :data="filtered_data" />
   </div>
 </template>
 
 <script>
 
-import { timeZone } from '@/api/common/static'
-import { getProp, modify } from '@/utils/data-handle'
-import { debounce } from '@/utils'
+import { timeZone } from '@/api/config/static'
 export default {
   name: 'Statistics',
   components: {
@@ -56,17 +67,11 @@ export default {
     data: null,
     lastUpdate: new Date(),
     show_only_map: false,
-    default_map_data: {
-      main: [{ name: 'test', value: 15 }, { name: 'GGG', value: 22 }]
-    },
-    filter: {}
+    filter: {},
+    filtered_data: [],
+    canRefresh: false
   }),
   computed: {
-    updatedSetting () {
-      return debounce(() => {
-        this.settingUpdated()
-      }, 1000)
-    },
     field_data() {
       const d = this.$store.state.common_fields.data
       return d && d.list
@@ -83,28 +88,6 @@ export default {
         this.$store.state.dashboard.setting = n
       }
     },
-    color_card () {
-      return getProp(this.setting, ['color', 'memberCard'])
-    },
-    color_main () {
-      return getProp(this.setting, ['color', 'barChart'])
-    },
-    dateRange () {
-      return {
-        start: getProp(this.setting, ['dateRange', 'start']),
-        end: getProp(this.setting, ['dateRange', 'end'])
-      }
-    },
-    memberSetting () {
-      return {
-        setting: getProp(this.setting, ['memberCard']),
-        data: {
-          main: [{ value: 1 }]
-        }
-      }
-    }
-  },
-  created () {
   },
   mounted () {
     setTimeout(() => {
@@ -116,7 +99,13 @@ export default {
   },
   methods: {
     timeZone,
-    modify,
+    doRefreshFilter() {
+      this.loading = true
+      this.canRefresh = false
+      const result = this.$refs.commonFilter.doFilter()
+      this.filtered_data = { default: result }
+      setTimeout(() => { this.loading = false }, 1e3)
+    },
     requireUpdateItems (items) {
       this.$refs.warningLine.updateItems(items)
     },
@@ -125,14 +114,6 @@ export default {
         window.addEventListener('resize', this.resize)
         // this.$refs.echartGeoDriver.refresh()
       })
-    },
-    settingUpdated () {
-      const dataDriver = this.$refs.dataDriver
-      if (dataDriver) {
-        dataDriver.refresh().then(() => {
-          this.refresh(true)
-        })
-      }
     },
     refresh () {
       this.chartsDoAction(c => {
@@ -168,10 +149,20 @@ export default {
 
 <style lang="scss">
 @import "./style/index.scss";
+@import '@/layout/components/menu-divider.scss';
+
 .on-right-menu {
   display: flex;
   position: fixed;
   top: 0;
   right: 0;
+}
+</style>
+<style lang="scss">
+.use-scroll{
+  &:hover{
+    overflow-y: auto;
+  }
+  overflow-y: hidden;
 }
 </style>
