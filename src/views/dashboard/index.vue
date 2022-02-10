@@ -1,17 +1,17 @@
 <template>
-  <div class="dashboard-container">
+  <CommonContainer class="dashboard-container">
     <Statistics />
-  </div>
+  </CommonContainer>
 </template>
 
 <script>
-import Statistics from './Statistics'
 
 export default {
   name: 'Dashboard',
-  components: { Statistics },
-  mounted() {
-    this.$store.dispatch('common_fields/init')
-  }
+  components: {
+    Statistics: () => import('./Statistics'),
+    CommonContainer: () => import('@/components/CommonContainer')
+  },
+
 }
 </script>

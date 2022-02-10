@@ -1,0 +1,12 @@
+.floating-search-pannel {
+	white-space:nowrap;
+  position: absolute;
+  z-index: 1000;
+  width: 2rem;
+  left: -1rem;
+  transition: all 0.5s ease;
+  &:hover {
+    left: 0rem;
+    width: 25rem;
+  }
+}

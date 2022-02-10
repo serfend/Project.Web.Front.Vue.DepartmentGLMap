@@ -5,7 +5,7 @@
 <script>
 import * as echarts from 'echarts'
 import 'echarts-gl'
-import { build_scatter } from '../../js/scatter'
+import { build_scatter } from '@/utils/echart-config/scatter'
 import { arrayToDict } from '@/utils'
 import waves from '@/directive/waves'
 export default {
