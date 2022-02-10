@@ -5,6 +5,10 @@
   "defaultSearchView":{
     "title":"详细列表"
   },
+  "seat-query":{
+    "title":"席位查询",
+    "description":"查询指定席位信息"
+  },
   "data-center": {
     "title":"数据中心",
     "description": "流量设备集群管理",

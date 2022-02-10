@@ -19,6 +19,14 @@ export default {
       },
     },
     {
+      path: 'seat-query',
+      component: () => import('@/views/SeatManage'),
+      meta: {
+        title: 'seat-query.title',
+        icon: 'duoqudaojicheng'
+      }
+    },
+    {
       path: 'data-center',
       component: () => import('@/views/DataAI/DataCenter'),
       name: 'dataCenter',
