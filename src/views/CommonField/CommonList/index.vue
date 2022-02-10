@@ -84,7 +84,7 @@ export default {
       const { id, values_dict } = prop
       const v = values[id]
       const result = (values_dict && values_dict[v]) || v
-      return result.alias || result
+      return (result && result.alias) || result
     },
     showDetail(row) {},
     refresh() {

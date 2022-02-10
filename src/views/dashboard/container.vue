@@ -1,6 +1,14 @@
 <template>
   <div id="container" class="container">
-    <Header :style="{height:isActive?'5rem':0,transition:'all ease 0.5s'}" />
+    <Header :style="{height:isActive?'5rem':0,transition:'all ease 0.5s'}">
+      <template #setting>
+        <el-form>
+          <el-form-item label="配置">
+            <span />
+          </el-form-item>
+        </el-form>
+      </template>
+    </Header>
     <div class="container-bg">
       <Breadcrumb style="margin-left:2rem;margin-top:-0.5rem;position:absolute" />
       <router-view />
