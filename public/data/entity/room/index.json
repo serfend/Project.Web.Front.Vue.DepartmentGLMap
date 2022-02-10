@@ -1,0 +1,26 @@
+{
+  "rooms": [
+    {
+      "name": "hjc-primary-1",
+      "alias": "韩家川某房间A",
+      "group": {
+        "name": "hjc-1",
+        "size": 1,
+        "offset": [0, 0]
+      }
+    },
+    {
+      "name": "hjc-primary-2",
+      "alias": "韩家川某房间B",
+      "group": {
+        "name": "hjc-1",
+        "size": 1,
+        "offset": [0, 1800]
+      }
+    },
+    {
+      "name": "zgc-primary",
+      "alias": "中关村某房间"
+    }
+  ]
+}

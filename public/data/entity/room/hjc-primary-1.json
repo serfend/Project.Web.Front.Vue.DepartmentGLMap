@@ -1,0 +1,34 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "adcode": 110000,
+        "name": "韩家川某房间",
+        "center": [15, 15],
+        "centroid": [15, 15],
+        "childrenNum": 16,
+        "level": "province",
+        "subFeatureIndex": 0,
+        "acroutes": [100000]
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [0, 0],
+              [2800, 0],
+              [2800, 300],
+              [3200, 300],
+              [3200, 1500],
+              [0, 1500]
+            ],
+            [[200, 200], [200, 280], [300, 280], [300, 200]]
+          ]
+        ]
+      }
+    }
+  ]
+}
