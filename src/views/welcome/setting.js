@@ -1,11 +1,10 @@
 export const default_pages = [
   {
-    label: 'data-center.title',
-    description: 'data-center.description',
+    label: 'seat-query.title',
+    description: 'seat-query.description',
     svg: 'duoqudaojicheng',
-    disabled: true,
     // icon: '/favicon.png',
-    href: '#/home/data-center',
+    href: '#/home/seat-query',
   },
   {
     label: 'model-config.title',

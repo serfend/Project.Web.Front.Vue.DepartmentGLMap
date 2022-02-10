@@ -22,6 +22,7 @@
     </div>
     <el-dialog :visible.sync="show_setting_dialog" append-to-body>
       <h3 slot="title" class="dialog-title">设置选项</h3>
+      <slot name="setting" />
     </el-dialog>
   </div>
 </template>
