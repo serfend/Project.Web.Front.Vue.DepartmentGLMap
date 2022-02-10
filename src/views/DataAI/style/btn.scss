@@ -1,0 +1,21 @@
+.btn-refresh{
+  transition: all ease 0.5s;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+  font-size: 1.5rem;
+  &:hover{
+    color:#00ff2a;
+  }
+  opacity: 0.1;
+  &.active{
+    animation:flashing-opacity 1s infinite;
+  }
+}
+@keyframes flashing-opacity
+{
+    0% {opacity: 1;}
+    50% {
+      opacity: 0;
+      transform: translateX(1rem);
+    }
+    100% {opacity: 1;}
+}

@@ -4,18 +4,13 @@
 
 <script>
 import * as echarts from 'echarts'
-import { createLinerSeries } from '@/views/dashboard/Statistics/js/linerGradient'
-import { parseTime } from '@/utils'
+import { createLinerSeries } from '@/utils/echart-config/linerGradient'
+import { parseTime, debounce } from '@/utils'
 import { formatSciItem } from '@/utils/math'
 import { get_device_detail } from '@/api/devices'
-import { debounce } from '@/utils'
 export default {
   name: 'DevicesStatus',
-  props: {
-    id: {
-      type: String,
-      default: null
-    }
+  props: { id: { type: String, default: null }
   },
   data: () => ({
     loading: false,

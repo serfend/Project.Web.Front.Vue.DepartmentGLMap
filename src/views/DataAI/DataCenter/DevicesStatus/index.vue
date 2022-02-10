@@ -4,7 +4,7 @@
 
 <script>
 import * as echarts from 'echarts'
-import { createLinerSeries } from '@/views/dashboard/Statistics/js/linerGradient'
+import { createLinerSeries } from '@/utils/echart-config/linerGradient'
 import { parseTime } from '@/utils'
 import { formatSciItem } from '@/utils/math'
 import { get_device_summary } from '@/api/devices'

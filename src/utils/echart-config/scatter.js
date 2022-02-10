@@ -1,12 +1,25 @@
 import { formatSciItem } from '@/utils/math'
 import { arrayToDict } from '@/utils'
 import store from '@/store'
+
+/**
+ * 创建标准散点系列
+ * data:
+   0,1:坐标
+   2:大小
+   3:颜色
+   4:形状
+ * @export
+ * @param {*} { data, group }
+ * @return {*}
+ */
 export function build_scatter({ data, group }) {
   const r = {
     type: 'effectScatter',
     coordinateSystem: 'geo',
     name: group.alias,
     data,
+    symbol: v => v[4],
     symbolSize: v => v[2],
     encode: { value: 2 },
     showEffectOn: 'render',
@@ -14,7 +27,8 @@ export function build_scatter({ data, group }) {
     itemStyle: {
       opacity: 1,
       shadowBlur: 10,
-      shadowColor: '#333'
+      shadowColor: '#333',
+      color: v => v.value[3] && v.value[3].color
     },
     blur: {
       labelLine: {
@@ -23,7 +37,6 @@ export function build_scatter({ data, group }) {
     },
     zlevel: 1
   }
-  if (group.color)r.itemStyle.color = group.color
   r.label = {
     formatter: '{b}',
     position: 'right',
@@ -111,7 +124,7 @@ function formatter_build_table(headers, list, header_dict) {
 }
 function getValue(value_dict, header_index, item) {
   const r = value_dict ? value_dict[item[header_index]] : item[header_index]
-  if (r.alias) return `${r.color ? getMarker(r.color) : ''}${r.alias}`
+  if (r && r.alias) return `${r.color ? getMarker(r.color) : ''}${r.alias}`
   return r || ''
 }
 function getMarker(color) {
