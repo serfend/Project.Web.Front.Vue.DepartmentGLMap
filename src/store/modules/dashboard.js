@@ -8,22 +8,13 @@ import {
 import {
   createSetting, loadSettingString
 } from './dashboard/index'
-import { loadLocations, loadMap } from '@/api/config/geo'
+import { loadLocations, loadMap, loadRoom } from '@/api/config/geo'
 import * as echarts from 'echarts'
 const actions = {
-  saveSetting({
-    commit,
-    state
-  }, {
-    name,
-    setting
-  }) {
+  saveSetting({ commit, state }, { name, setting }) {
     localStorage.setItem(`dashboard.setting[${name}]`, JSON.stringify(setting))
   },
-  loadLocations({
-    commit,
-    state
-  }) {
+  loadLocations({ commit, state }) {
     return new Promise((res, rej) => {
       if (state.locations) return res(state.locations)
       loadLocations().then(data => {
@@ -32,27 +23,35 @@ const actions = {
       }).catch(e => rej(e))
     })
   },
-  loadMap({
-    commit,
-    state
-  }, {
-    name, code
-  }) {
+
+  /**
+   * 注册地图
+   *
+   * @param {*} { commit, state }
+   * @param {*} {
+     name 注册的地图名称,
+     code 加载的地图,
+     isRoom 是否是房间,
+     directMapDatas 是否直接通过数据注册
+      }
+   * @return {*}
+   */
+  loadMap({ commit, state }, { name, code, isRoom, directMapDatas }) {
     return new Promise((res, rej) => {
+      if (directMapDatas) {
+        echarts.registerMap(name, directMapDatas)
+        return res(directMapDatas)
+      }
       const t = echarts.getMap(name)
       if (t) return res(t)
-      loadMap(code).then(data => {
+      const f = isRoom ? loadRoom : loadMap
+      f(code).then(data => {
         echarts.registerMap(name, data)
         return res(data)
       }).catch(e => rej(e))
     })
   },
-  loadSetting({
-    commit,
-    state
-  }, {
-    name
-  }) {
+  loadSetting({ commit, state }, { name }) {
     return new Promise((res, rej) => {
       const rawSetting = loadSettingString(name)
       if (rawSetting) {
