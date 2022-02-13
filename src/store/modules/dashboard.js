@@ -51,6 +51,20 @@ const actions = {
       }).catch(e => rej(e))
     })
   },
+
+  /**
+   * 检查地图是否存在
+   *
+   * @param {*} { commmit, state }
+   * @param {*} { name }
+   * @return {*}
+   */
+  checkMap({ commmit, state }, { name }) {
+    return new Promise((res, rej) => {
+      const d = echarts.getMap(name)
+      return res(d)
+    })
+  },
   loadSetting({ commit, state }, { name }) {
     return new Promise((res, rej) => {
       const rawSetting = loadSettingString(name)
