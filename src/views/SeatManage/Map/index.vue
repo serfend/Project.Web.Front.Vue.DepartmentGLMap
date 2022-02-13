@@ -1,7 +1,8 @@
 <template>
   <div :style="{height:height,width:width}">
     <MapConfiguration />
-    <div v-waves :style="{height:height,width:width}" />
+    <el-button @click="switchRoomGroup()">测试</el-button>
+    <div id="chart" v-waves :style="{height:height,width:width}" />
   </div>
 </template>
 
@@ -36,7 +37,8 @@ export default {
     series: [],
     lastSeriersDict: {}, // 用于记录上次的系列，避免出现空序列导致不刷新的情况
     rootLoading: false,
-    roomGroups: []
+    roomGroups: [],
+    currentRoomGroup: -1
   }),
   computed: {
     dict_ready () {
@@ -94,9 +96,16 @@ export default {
   },
   methods: {
     async initChart () {
-      this.chart = echarts.init(this.$el)
+      this.chart = echarts.init(this.$el.querySelector('#chart'))
       await this.loadRoomList()
-      await this.loadRoomGroup(this.roomGroups[0])
+      this.switchRoomGroup()
+    },
+    async switchRoomGroup(index) {
+      if (index === undefined || index < 0)index = this.currentRoomGroup
+      index++
+      if (index >= this.roomGroups.length)index = 0
+      this.currentRoomGroup = index
+      await this.loadRoomGroup(this.roomGroups[this.currentRoomGroup])
     },
     loadRoomList() {
       // TODO split-page
@@ -119,11 +128,17 @@ export default {
       })
     },
     async loadRoomGroup(maps) {
+      if (!maps || !maps.list) {
+        this.$message.error('无效的地图配置')
+        return
+      }
       this.innerLoading = true
       const directMapDatas = await this.loadMapData(maps)
-      this.initChartSkeleton(maps.k)
-      const g = directMapDatas.geoJson || directMapDatas
-      this.data = g.seats.flat().filter(i => i)
+      if (directMapDatas) {
+        this.initChartSkeleton(maps.k)
+        const g = directMapDatas.geoJson || directMapDatas
+        this.data = g.seats.flat().filter(i => i)
+      }
       this.innerLoading = false
     },
     async loadMapData(maps) {
@@ -137,7 +152,10 @@ export default {
       }
       // initialize all room data
       const mapsDataPromise = maps.list.map(i => this.$store.dispatch('dashboard/loadMap', { name: i.name, code: i.name, isRoom: true }))
-      const datas = await Promise.all(mapsDataPromise)
+      const datas = await Promise.all(mapsDataPromise).catch(e => {
+        this.$message.error(`[${maps.name || maps.k}]的地图加载失败`)
+      })
+      if (!datas) return
       datas.map((i, index) => {
         maps.list[index].room = i
       })
