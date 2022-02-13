@@ -1,10 +1,8 @@
 <template>
-  <div>
-    <CommonContainer>
-      <DefaultSearchPannel class="floating-search-pannel" style="margin-top:5rem" />
-      <Map />
-    </CommonContainer>
-  </div>
+  <CommonContainer>
+    <DefaultSearchPannel class="floating-search-pannel" style="margin-top:5rem" />
+    <Map />
+  </CommonContainer>
 </template>
 
 <script>
