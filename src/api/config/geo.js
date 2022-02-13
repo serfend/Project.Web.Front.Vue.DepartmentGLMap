@@ -18,9 +18,7 @@ const apiRoom = '/data/entity/room'
  */
 export function loadRoom(codepath) {
   const path = `${apiRoom}/${codepath}`
-  return cached_data(path, () => {
-    return request.get(`${path}.json`)
-  })
+  return request.get(`${path}.json`)
 }
 
 /**
@@ -32,10 +30,8 @@ export function loadRoom(codepath) {
  */
 export function loadRoomList({ pageIndex, pageSize }) {
   const path = `${apiRoom}/index`
-  return cached_data(path, () => {
-    return request.get(`${path}.json`, {
-      params: { pageIndex, pageSize }
-    })
+  return request.get(`${path}.json`, {
+    params: { pageIndex, pageSize }
   })
 }
 export function loadLocations() {
