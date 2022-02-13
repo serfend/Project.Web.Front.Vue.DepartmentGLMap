@@ -13,6 +13,7 @@ import { arrayToDict } from '@/utils'
 import { to_property_getter } from '@/utils/data-handle/common-field'
 import { groupByPredict } from '@/utils/data-handle'
 import { loadRoomList } from '@/api/config/geo'
+import { mergeRoom } from './roomLoader'
 import waves from '@/directive/waves'
 export default {
   name: 'SeatMap',
@@ -119,62 +120,37 @@ export default {
     },
     async loadRoomGroup(maps) {
       this.innerLoading = true
-      const { name, k, list } = maps
-      const mapsDataPromise = list.map(i => this.$store.dispatch('dashboard/loadMap', { name: i.name, code: i.name, isRoom: true }))
-      // TODO 需要变换坐标
-      const mergeFeatures = features => {
-        features.map((i, index) => {
-          const { geometry, properties, alias } = i
-          const size = i.size || 1
-          const offset = i.offset || [0, 0]
-          properties.name = alias
-          const coordinates = geometry.coordinates
-          coordinates.map(coordinate => {
-            coordinate.map(positions => {
-              positions.map(pos => {
-                pos[0] *= size
-                pos[1] *= size
-                pos[0] += (offset[0] || 0)
-                pos[1] += (offset[1] || 0)
-              })
-            })
-          })
-          return i
-        })
-        return features
-      }
-      const mergeSeats = seats => {
-        return seats
-      }
-      const datas = await Promise.all(mapsDataPromise)
-      datas.map((i, index) => {
-        list[index].room = i
-      })
-      const rooms = list.map((i, index) => {
-        const { alias, group } = list[index]
-        const { offset, size } = group
-        i.room.features.map(i => {
-          i.alias = alias
-          i.offset = offset
-          i.size = size
-        })
-        return i.room
-      })
-      const mergeRoom = {
-        features: mergeFeatures(rooms.map(i => i.features).flat()),
-        seats: mergeSeats(rooms.map(i => i.seats)),
-        type: rooms[0].type,
-        name
-      }
-      debugger
-      await this.$store.dispatch('dashboard/loadMap', { name: k, directMapDatas: mergeRoom, isRoom: true })
-      this.initChartSkeleton(k)
-      this.data = mergeRoom.seats.flat().filter(i => i)
-      console.log('data is set', this.data)
+      const directMapDatas = await this.loadMapData(maps)
+      this.initChartSkeleton(maps.k)
+      const g = directMapDatas.geoJson || directMapDatas
+      this.data = g.seats.flat().filter(i => i)
       this.innerLoading = false
     },
+    async loadMapData(maps) {
+      // check dict-ready status inner
+      if (!this.dict_ready) {
+        return new Promise((res, rej) => {
+          setTimeout(() => {
+            this.loadMapData(maps).then(data => { res(data) }).catch(e => rej(e))
+          }, 500)
+        })
+      }
+      // initialize all room data
+      const mapsDataPromise = maps.list.map(i => this.$store.dispatch('dashboard/loadMap', { name: i.name, code: i.name, isRoom: true }))
+      const datas = await Promise.all(mapsDataPromise)
+      datas.map((i, index) => {
+        maps.list[index].room = i
+      })
+      // merge room infomation
+      const position_field = this.fields_prop.position_field
+      let directMapDatas = await this.$store.dispatch('dashboard/checkMap', { name: maps.k })
+      if (!directMapDatas) {
+        directMapDatas = Object.assign({ name }, mergeRoom(maps.list, position_field))
+        await this.$store.dispatch('dashboard/loadMap', { name: maps.k, directMapDatas, isRoom: true })
+      }
+      return directMapDatas
+    },
     async refresh () {
-      console.log('refresh is call')
       this.innerLoading = true
       this.refreshData()
       this.innerLoading = false
