@@ -1,6 +1,6 @@
 <template>
   <div :style="{height:height,width:width}">
-    <MapConfiguration v-model="currentRoomGroup" :groups="roomGroups" @requireSwitch="switchRoomGroup()" />
+    <MapConfiguration v-model="currentRoomGroup" :groups="roomGroups" @requireSwitch="switchRoomGroup(null,true)" @roomChanged="handleRoomChanged" />
     <div id="chart" v-waves :style="{height:height,width:width}" />
   </div>
 </template>
@@ -36,6 +36,7 @@ export default {
     series: [],
     lastSeriersDict: {}, // 用于记录上次的系列，避免出现空序列导致不刷新的情况
     rootLoading: false,
+    roomGroupsDict: {},
     roomGroups: [],
     currentRoomGroup: -1
   }),
@@ -85,11 +86,18 @@ export default {
     async initChart () {
       this.chart = echarts.init(this.$el.querySelector('#chart'))
       await this.loadRoomList()
-      this.switchRoomGroup()
+      this.switchRoomGroup(-1, true)
     },
-    async switchRoomGroup(index) {
-      if (index === undefined || index < 0)index = this.currentRoomGroup
-      index++
+    handleRoomChanged(v) {
+      const { k, selected } = v
+      if (!selected) return this.switchEmpty()
+      this.switchRoomGroup(this.roomGroupsDict[k].index)
+    },
+    // TODO 切换为空视图
+    switchEmpty() {},
+    async switchRoomGroup(index, moveNext) {
+      if (!Number.isInteger(index) || index < 0)index = this.currentRoomGroup
+      if (moveNext)index++
       if (index >= this.roomGroups.length)index = 0
       this.currentRoomGroup = index
     },
@@ -104,11 +112,14 @@ export default {
           }
           return v.group.name
         })
-        this.roomGroups = Object.keys(groupDict).map(k => {
-          const r = { k, list: groupDict[k] }
+        const roomDict = {}
+        this.roomGroups = Object.keys(groupDict).map((k, index) => {
+          const r = { k, list: groupDict[k], index }
           r.name = r.list[0].alias || 'unknown'
+          roomDict[k] = r
           return r
         })
+        this.roomGroupsDict = roomDict
       }).finally(() => {
         this.innerLoading = false
       })
