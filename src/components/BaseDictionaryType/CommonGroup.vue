@@ -118,6 +118,12 @@ export default {
   box-shadow: 0 2px 12px 0 rgba(24, 118, 224, 0.5);
   background-color: $--color-primary;
   color: $--border-color-light;
+	.item-alias-dark{
+		color:#000;
+	}
+	.item-alias{
+		color:#fff;
+	}
 }
 %base-item-alias{
   font-size: 0.8rem;
