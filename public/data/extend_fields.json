@@ -30,9 +30,10 @@
         { "alias": "北部", "id": 4, "value": 8 },
         { "alias": "中部", "id": 5, "value": 16 }
       ],
-      "query_enable": true,
-      "filter_enable": true,
-      "show_enable": true
+      "query_enable": false,
+      "filter_enable": false,
+      "show_enable": false,
+      "hidden": true
     },
     {
       "id": "3",
@@ -42,9 +43,6 @@
       "type_config": {
         "multi": true
       },
-      "query_enable": true,
-      "filter_enable": true,
-      "show_enable": true,
       "values": [
         {
           "alias": "J",
@@ -56,7 +54,11 @@
         },
         { "alias": "S", "id": 2, "value": 2, "size": 32 },
         { "alias": "U", "id": 3, "value": 4, "size": 24 }
-      ]
+      ],
+      "query_enable": false,
+      "filter_enable": false,
+      "show_enable": false,
+      "hidden": true
     },
     {
       "id": "4",
@@ -70,15 +72,17 @@
       "name": "position",
       "alias": "坐标",
       "type": "el-input",
-      "show_enable": true
+      "show_enable": true,
+      "hidden": true
     },
     {
       "id": "5",
       "name": "admin_division",
       "alias": "行政区划",
       "type": "BaseAdminDivision",
-      "show_enable": true,
-      "filter_enable": true
+      "show_enable": false,
+      "filter_enable": false,
+      "hidden": true
     },
     {
       "id": "7",
