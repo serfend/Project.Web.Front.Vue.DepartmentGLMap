@@ -1,22 +1,19 @@
 <template>
-  <div style="background:#f00;height:2rem">
-    <el-button @click="switchMap()">测试</el-button>
-    <el-card class="floating-search-panel-right" style="margin-top:5rem;">
-      <template #header>
-        <h2>房间组选取</h2>
-      </template>
-      <div style="max-height: 30rem;overflow-y: auto;overflow-x: hidden;">
-        <CommonGroup
-          v-for="g in innerGroups"
-          :key="g.k"
-          :data="g"
-          :selected.sync="g.selected"
-          :is-selector="true"
-          @click="handleClick(g)"
-        />
-      </div>
-    </el-card>
-  </div>
+  <el-card class="floating-search-panel-right" style="margin-top:5rem;">
+    <template #header>
+      <h2>房间组选取</h2>
+    </template>
+    <div style="max-height: 30rem;overflow-y: auto;overflow-x: hidden;">
+      <CommonGroup
+        v-for="g in innerGroups"
+        :key="g.k"
+        :data="g"
+        :selected.sync="g.selected"
+        :is-selector="true"
+        @click="handleClick(g)"
+      />
+    </div>
+  </el-card>
 </template>
 
 <script>
