@@ -2,7 +2,7 @@
   <div class="frame-container">
     <el-row :gutter="20">
       <el-col :sm="24" :lg="6">
-        <DefaultSearchPannel :loading.sync="loading" :filtered_data.sync="filtered_data" />
+        <DefaultSearchPanel :loading.sync="loading" :filtered_data.sync="filtered_data" />
       </el-col>
       <el-col :sm="24" :lg="18">
         <el-card shadow="hover">
@@ -18,7 +18,7 @@ export default {
   name: 'DefaultSearchView',
   components: {
     CommonList: () => import('../CommonList'),
-    DefaultSearchPannel: () => import('./DefaultSearchPannel')
+    DefaultSearchPanel: () => import('./DefaultSearchPanel')
   },
   data: () => ({
     loading: false,

@@ -12,7 +12,7 @@
           <div v-if="settings" :style="{transition:'all ease 0.5s',transform: btnExitTransform}">
             <el-button type="danger" @click="panel_out(false)">关闭</el-button>
             <el-switch
-              v-model="settings.manual_close_pannel"
+              v-model="settings.manual_close_panel"
               inactive-text="自动隐藏"
               active-text="常驻"
             />

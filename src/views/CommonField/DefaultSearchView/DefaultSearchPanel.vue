@@ -1,16 +1,17 @@
 <template>
-  <el-card shadow="hover" style="overflow:hidden">
+  <el-card shadow="hover" style="overflow:hidden" class="floating-search-panel">
     <h3 slot="header">
       <span>筛选方式</span>
       <el-button :disabled="!canRefresh" :class="['btn-refresh',canRefresh?'active':'']" type="text" @click="doRefreshFilter">有新数据 点击刷新</el-button>
     </h3>
-    <CommonFilter ref="commonFilter" v-model="filter" :fields="field_list" :data="field_data" type="query" @filterChange="canRefresh = true" />
+    <slot v-if="$slots.content" ref="commonFilter" name="content" />
+    <CommonFilter v-else ref="commonFilter" v-model="filter" :fields="field_list" :data="field_data" type="query" @filterChange="canRefresh = true" />
   </el-card>
 </template>
 
 <script>
 export default {
-  name: 'DefaultSearchPannel',
+  name: 'DefaultSearchPanel',
   components: {
     CommonFilter: () => import('../CommonFilter'),
   },
@@ -63,4 +64,8 @@ export default {
 </script>
 <style lang="scss" scoped>
 @import '@/views/DataAI/style';
+</style>
+
+<style lang="scss" scoped>
+@import "@/styles/panel.scss";
 </style>

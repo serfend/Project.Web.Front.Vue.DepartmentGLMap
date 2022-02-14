@@ -49,7 +49,7 @@ export default {
     queryFormRecord: null,
     settings: {
       _version: 1,
-      manual_close_pannel: false
+      manual_close_panel: false
     },
     settingsRecord: null,
     innerPages: {
@@ -176,7 +176,7 @@ export default {
     panel_out(out, delay) {
       this.panel_should_out = !!out
       if (!delay) return this.checkPanelStatus()
-      if (!out && this.settings.manual_close_pannel) return
+      if (!out && this.settings.manual_close_panel) return
       if (this.checker) clearTimeout(this.checker)
       this.checker = setTimeout(() => {
         this.checkPanelStatus()

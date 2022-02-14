@@ -1,7 +1,6 @@
 <template>
   <div :style="{height:height,width:width}">
-    <MapConfiguration />
-    <el-button @click="switchRoomGroup()">测试</el-button>
+    <MapConfiguration v-model="currentRoomGroup" :groups="roomGroups" @requireSwitch="switchRoomGroup()" />
     <div id="chart" v-waves :style="{height:height,width:width}" />
   </div>
 </template>
@@ -63,25 +62,13 @@ export default {
     }
   },
   watch: {
-    series: {
-      handler (val) {
-        this.refresh()
-      },
-      deep: true
-    },
-    dict_ready (v) {
-      if (!v) return
-      this.updateData()
-    },
-    loading (val) {
-      this.innerLoading = val
-    },
-    data: {
-      handler (v) {
-        if (!v) return
-        this.updateData()
-      },
-      deep: true
+    series: { handler (val) { this.refresh() }, deep: true },
+    dict_ready (v) { if (!v) { return } this.updateData() },
+    loading (val) { this.innerLoading = val },
+    data: { handler (v) { if (!v) { return } this.updateData() }, deep: true },
+    currentRoomGroup(v) {
+      if (v === undefined) { return }
+      this.loadRoomGroup(this.roomGroups[this.currentRoomGroup])
     }
   },
   mounted () {
@@ -105,7 +92,6 @@ export default {
       index++
       if (index >= this.roomGroups.length)index = 0
       this.currentRoomGroup = index
-      await this.loadRoomGroup(this.roomGroups[this.currentRoomGroup])
     },
     loadRoomList() {
       // TODO split-page

@@ -5,7 +5,7 @@
         <h2>找回账号</h2>
       </template>
       <div class="page-container">
-        <el-collapse v-model="activePannel" accordion>
+        <el-collapse v-model="activePanel" accordion>
           <el-collapse-item name="0" title="说明">
             <div class="warning">
               <p>此页面用于恢复账号或找回用户名密码</p>
@@ -94,7 +94,7 @@ export default {
     AuthCode: () => import('@/components/AuthCode')
   },
   data: () => ({
-    activePannel: '0',
+    activePanel: '0',
     account: {
       auth: {},
       id: '',

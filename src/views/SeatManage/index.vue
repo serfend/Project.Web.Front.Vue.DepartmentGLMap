@@ -1,6 +1,6 @@
 <template>
   <CommonContainer>
-    <DefaultSearchPannel class="floating-search-pannel" style="margin-top:5rem" />
+    <DefaultSearchPanel style="margin-top:5rem" />
     <Map />
   </CommonContainer>
 </template>
@@ -11,10 +11,7 @@ export default {
   components: {
     Map: () => import('./Map'),
     CommonContainer: () => import('@/components/CommonContainer'),
-    DefaultSearchPannel: () => import('@/views/CommonField/DefaultSearchView/DefaultSearchPannel')
+    DefaultSearchPanel: () => import('@/views/CommonField/DefaultSearchView/DefaultSearchPanel')
   }
 }
 </script>
-<style lang="scss" scoped>
-@import "./style/option.scss"
-</style>
