@@ -73,7 +73,7 @@ function format_tooltip(params, ticket, async_callback) {
     const raw = params.data.value
     const r = []
     r.push(`${params.marker}${params.data.name}<hr/>`)
-    const data = raw && raw[4]
+    const data = raw && raw[raw.length - 1]
     if (!data) {
       r.push('无数据')
       result = r.join('')
