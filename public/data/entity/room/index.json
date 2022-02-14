@@ -2,16 +2,17 @@
   "rooms": [
     {
       "name": "hjc-primary-1",
-      "alias": "韩家川某房间A",
+      "alias": "西北旺某房间A",
       "group": {
         "name": "hjc-1",
         "size": 1,
-        "offset": [0, 0]
+        "offset": [0, 0],
+        "alias": "西北旺产业园"
       }
     },
     {
       "name": "hjc-primary-2",
-      "alias": "韩家川某房间B",
+      "alias": "西北旺某房间B",
       "group": {
         "name": "hjc-1",
         "size": 1,

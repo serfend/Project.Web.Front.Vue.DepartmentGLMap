@@ -62,8 +62,7 @@ export function mergeRoom (list, positionField) {
   const result = {
     features: mergeFeatures(list),
     seats: mergeSeats(list, positionField),
-    type: list[0].room.type,
-    name
+    type: list[0].room.type
   }
   return result
 }

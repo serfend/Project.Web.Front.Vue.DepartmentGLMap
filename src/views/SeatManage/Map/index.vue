@@ -1,5 +1,6 @@
 <template>
   <div :style="{height:height,width:width}">
+    <MapFilter />
     <MapConfiguration v-model="currentRoomGroup" :groups="roomGroups" @requireSwitch="switchRoomGroup(null,true)" @roomChanged="handleRoomChanged" />
     <div id="chart" v-waves :style="{height:height,width:width}" />
   </div>
@@ -18,7 +19,8 @@ import waves from '@/directive/waves'
 export default {
   name: 'SeatMap',
   components: {
-    MapConfiguration: () => import('./MapConfiguration')
+    MapConfiguration: () => import('./MapConfiguration'),
+    MapFilter: () => import('./MapFilter')
   },
   directives: {
     waves
@@ -28,7 +30,8 @@ export default {
     height: { type: String, default: '1080px' },
     speed: { type: Number, default: 1 },
     color: { type: Array, default: () => [] },
-    loading: { type: Boolean, default: false }
+    loading: { type: Boolean, default: false },
+    filteredData: { type: Array, default: () => [] }
   },
   data: () => ({
     chart: null,
@@ -110,6 +113,7 @@ export default {
           if (!v.group) {
             v.group = { name: `group-${index++}` }
           }
+          if (v.group.alias)v.alias = v.group.alias
           return v.group.name
         })
         const roomDict = {}
