@@ -1,8 +1,13 @@
 <template>
   <div style="background:#f00;height:2rem">
     <el-button @click="switchMap()">测试</el-button>
-    <el-card class="floating-search-panel">
-      213
+    <el-card class="floating-search-panel-right" style="margin-top:5rem;">
+      <template #header>
+        <h2>房间组选取</h2>
+      </template>
+      <div style="max-height: 30rem;overflow-y: auto;overflow-x: hidden;">
+        <div v-for="g in groups.concat(new Array(80).fill(0).map((i,index)=>({k:index})))" :key="g.k">{{ g }}</div>
+      </div>
     </el-card>
   </div>
 </template>
@@ -21,12 +26,12 @@ export default {
     groups: { type: Array, default: () => [] }
   },
   methods: {
-    switchMap() {
+    switchMap () {
       this.$emit('requireSwitch')
     }
   }
 }
 </script>
 <style lang="scss" scoped>
-@import "@/styles/panel.scss";
+@import '@/styles/panel.scss';
 </style>

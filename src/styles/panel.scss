@@ -1,12 +1,31 @@
-.floating-search-panel {
-	white-space:nowrap;
+%base-floating-search-panel {
+  white-space: nowrap;
   position: absolute;
   z-index: 1000;
   width: 2rem;
-  left: -1rem;
   transition: all 0.5s ease;
+  opacity: 0.5;
+}
+%base-floating-search-panel-hover{
+  width: 25rem;
+  opacity: 1;
+}
+%floating-search-panel-left {
+  @extend %base-floating-search-panel;
+  left: -1rem;
   &:hover {
+    @extend %base-floating-search-panel-hover;
     left: 0rem;
-    width: 25rem;
+  }
+}
+.floating-search-panel{
+  @extend %floating-search-panel-left;
+}
+.floating-search-panel-right {
+  @extend %base-floating-search-panel;
+  right: -1rem;
+  &:hover {
+    @extend %base-floating-search-panel-hover;
+    right: 0rem;
   }
 }

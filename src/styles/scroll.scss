@@ -1,8 +1,9 @@
+@import './variables.scss';
 ::-webkit-scrollbar {
   height: 20px;
   overflow: visible;
   width: 10px;
-  background: white;
+  background: $scrollBackground;
   // border-left: 1px solid #DDD;
 }
 
@@ -11,12 +12,12 @@
   border: solid transparent;
   border-width: 0;
   &:hover,&:active {
-      background-color: rgba(0,0,0,.05);
+      background-color: $scrollBackground;
   }
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: rgba(0,0,0,.2);
+  background-color: $scrollColor;
   background-clip: padding-box;
   border: solid transparent;
   border-width: 3px 3px 3px 4px;
