@@ -116,7 +116,7 @@
       "show_enable": true,
       "values": [
         { "alias": "在线", "id": 1, "value": 1, "color": "#33cc33" },
-        { "alias": "离线", "id": 2, "value": 0, "color": "#cccccc" }
+        { "alias": "离线", "id": 2, "value": 2, "color": "#cccccc" }
       ]
     }
   ],
