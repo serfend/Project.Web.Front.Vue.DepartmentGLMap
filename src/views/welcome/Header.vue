@@ -20,7 +20,7 @@
         </span>
       </span>
     </div>
-    <el-dialog :visible.sync="show_setting_dialog" append-to-body>
+    <el-dialog v-el-drag-dialog :visible.sync="show_setting_dialog" append-to-body>
       <h3 slot="title" class="dialog-title">设置选项</h3>
       <slot name="setting" />
     </el-dialog>
@@ -30,9 +30,13 @@
 <script>
 import SvgIcon from '@/components/SvgIcon'
 import { generateTitle } from '@/utils/i18n'
+import elDragDialog from '@/directive/el-drag-dialog'
 export default {
   name: 'Header',
   components: { SvgIcon },
+  directives: {
+    elDragDialog
+  },
   data: () => ({
     show_setting_dialog: false
   }),

@@ -1,8 +1,9 @@
 <template>
-  <el-card shadow="hover" style="overflow:hidden" class="floating-search-panel">
+  <el-card v-delay="({e,isHide})=>active = !isHide" shadow="hover" style="overflow:hidden" :class="['search-panel',active?'search-panel-active':'']">
     <h3 slot="header">
       <span>筛选方式</span>
-      <el-button :disabled="!canRefresh" :class="['btn-refresh',canRefresh?'active':'']" type="text" @click="doRefreshFilter">有新数据 点击刷新</el-button>
+      <el-button :disabled="!canRefresh" :class="['btn-refresh',canRefresh?'active':'disactive']" type="text" @click="doRefreshFilter">数据变化 点击刷新</el-button>
+      <span>{{ filtered_data.length }}/{{ rawData.length }}条</span>
     </h3>
     <slot v-if="$slots.content" ref="commonFilter" name="content" />
     <CommonFilter v-else ref="commonFilter" v-model="filter" :fields="field_list" :data="field_data" type="query" @filterChange="canRefresh = true" />
@@ -10,10 +11,17 @@
 </template>
 
 <script>
+import delay from '@/directive/delay'
 export default {
   name: 'DefaultSearchPanel',
   components: {
     CommonFilter: () => import('../CommonFilter'),
+  },
+  directives: {
+    delay
+  },
+  props: {
+    rawData: { type: Array, default: null } // 目标过滤的数组
   },
   data: () => ({
     canRefresh: false,
@@ -21,6 +29,7 @@ export default {
     firstRefresh: true,
     filtered_data: [],
     loading: false,
+    active: false
   }),
   computed: {
     Loading: {
@@ -28,6 +37,7 @@ export default {
       set (v) { this.loading = v }
     },
     field_data() {
+      if (this.rawData) return this.rawData
       const d = this.$store.state.common_fields.data
       return d && d.list
     },

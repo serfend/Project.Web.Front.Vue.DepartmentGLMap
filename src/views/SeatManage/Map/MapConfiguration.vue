@@ -1,5 +1,5 @@
 <template>
-  <el-card class="floating-search-panel-right" style="margin-top:5rem;">
+  <el-card v-delay="({e,isHide})=>active = !isHide" :class="['search-panel-right',active?'search-panel-active':'']" style="margin-top:5rem;">
     <template #header>
       <h2>房间组选取</h2>
     </template>
@@ -17,10 +17,14 @@
 </template>
 
 <script>
+import delay from '@/directive/delay'
 export default {
   name: 'MapConfiguration',
   components: {
     CommonGroup: () => import('@/components/BaseDictionaryType/CommonGroup')
+  },
+  directives: {
+    delay
   },
   model: {
     prop: 'value',
@@ -31,7 +35,8 @@ export default {
     groups: { type: Array, default: () => [] }
   },
   data: () => ({
-    innerGroups: []
+    innerGroups: [],
+    active: false
   }),
   watch: {
     groups: {

@@ -1,7 +1,7 @@
 <template>
   <div :style="{height:height,width:width}">
-    <MapFilter />
-    <MapConfiguration v-model="currentRoomGroup" :groups="roomGroups" @requireSwitch="switchRoomGroup(null,true)" @roomChanged="handleRoomChanged" />
+    <MapFilter :raw-data="data" :filtered_data.sync="filtered_data" />
+    <MapConfiguration v-model="currentRoomGroupIndex" :groups="roomGroups" @requireSwitch="switchRoomGroup(null,true)" @roomChanged="handleRoomChanged" />
     <div id="chart" v-waves :style="{height:height,width:width}" />
   </div>
 </template>
@@ -36,12 +36,13 @@ export default {
   data: () => ({
     chart: null,
     data: null,
+    filtered_data: null,
     series: [],
     lastSeriersDict: {}, // 用于记录上次的系列，避免出现空序列导致不刷新的情况
     rootLoading: false,
     roomGroupsDict: {},
     roomGroups: [],
-    currentRoomGroup: -1
+    currentRoomGroupIndex: -1
   }),
   computed: {
     dict_ready () {
@@ -69,10 +70,10 @@ export default {
     series: { handler (val) { this.refresh() }, deep: true },
     dict_ready (v) { if (!v) { return } this.updateData() },
     loading (val) { this.innerLoading = val },
-    data: { handler (v) { if (!v) { return } this.updateData() }, deep: true },
-    currentRoomGroup(v) {
+    filtered_data: { handler (v) { if (!v) { return } this.updateData() }, deep: true },
+    currentRoomGroupIndex(v) {
       if (v === undefined) { return }
-      this.loadRoomGroup(this.roomGroups[this.currentRoomGroup])
+      this.loadRoomGroup(this.roomGroups[this.currentRoomGroupIndex])
     }
   },
   mounted () {
@@ -99,10 +100,10 @@ export default {
     // TODO 切换为空视图
     switchEmpty() {},
     async switchRoomGroup(index, moveNext) {
-      if (!Number.isInteger(index) || index < 0)index = this.currentRoomGroup
+      if (!Number.isInteger(index) || index < 0)index = this.currentRoomGroupIndex
       if (moveNext)index++
       if (index >= this.roomGroups.length)index = 0
-      this.currentRoomGroup = index
+      this.currentRoomGroupIndex = index
     },
     loadRoomList() {
       // TODO split-page
@@ -175,7 +176,7 @@ export default {
       this.innerLoading = false
     },
     updateData () {
-      if (!this.dict_ready || !this.data) return
+      if (!this.dict_ready || !this.filtered_data) return
       const { fields_prop, fields_dict } = this
       const { color_field, size_field, position_field, shape_field, group_field, division_field } = fields_prop
       const dict_getter = to_property_getter(fields_dict, (dict, v) => dict[v] && dict[v].values_dict || {})
@@ -208,7 +209,7 @@ export default {
         }
       }
       const dict = {}
-      const list = this.data.map(convertData).filter(i => i)
+      const list = this.filtered_data.map(convertData).filter(i => i)
       list.map(i => {
         const item = i.value[6] // 分组
         const key = (item && item.alias || item.name) || 'unknown'

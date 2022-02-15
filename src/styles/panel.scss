@@ -4,9 +4,9 @@
   z-index: 1000;
   width: 2rem;
   transition: all 0.5s ease;
-  opacity: 0.5;
+  opacity: 0.2;
 }
-%base-floating-search-panel-hover{
+%base-floating-search-panel-hover {
   width: 25rem;
   opacity: 1;
 }
@@ -18,8 +18,9 @@
     left: 0rem;
   }
 }
-.floating-search-panel{
+.floating-search-panel {
   @extend %floating-search-panel-left;
+  left: -1rem;
 }
 .floating-search-panel-right {
   @extend %base-floating-search-panel;
@@ -28,4 +29,18 @@
     @extend %base-floating-search-panel-hover;
     right: 0rem;
   }
+}
+.search-panel {
+  left: -1rem;
+  @extend %base-floating-search-panel;
+}
+.search-panel-right {
+  @extend %base-floating-search-panel;
+  right: -1rem;
+}
+.search-panel-active {
+  @extend %base-floating-search-panel-hover;
+}
+.search-panel-disactive {
+  @extend %base-floating-search-panel;
 }
