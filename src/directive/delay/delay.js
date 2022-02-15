@@ -1,17 +1,21 @@
 const context = '@@delayContext'
 
 function callbackMethod (el, value) {
-  let lastTimer = null
+  let lastTimer = new Date()
   let currentIsHideStatus = true
   function handle (e) {
+    const currentTimer = new Date()
+    if (currentTimer - lastTimer < 5e2) return
+    lastTimer = currentTimer
     const opts = Object.assign({
       time: 5e3, // 定时时间
       callback: () => { console.warn('delay callback is undefined') }, // 当定时达到后的回调
       checker: (element) => true, // 当定时达到后首先检查是否满足回调条件
       el,
     }, typeof (value) === 'function' ? { callback: value } : value)
-    clearTimeout(lastTimer)
-    lastTimer = setTimeout(() => {
+
+    setTimeout(() => {
+      if (currentTimer !== lastTimer) return // 该请求已作废
       if (!opts.checker(e)) return
       if (currentIsHideStatus) return
       currentIsHideStatus = true
@@ -42,14 +46,12 @@ const safe_package = () => {
   let callback_event = 'mousemove'
   const r = {
     bind (el, binding) {
+      console.log('start binding')
       callback_event = binding.callback_event || callback_event
       el.addEventListener(callback_event, callbackMethod(el, binding.value), false)
     },
-    update (el, binding) {
-      el.removeEventListener(callback_event, el[context].removeHandle, false)
-      el.addEventListener(callback_event, callbackMethod(el, binding.value), false)
-    },
     unbind (el) {
+      console.log('unbind binding')
       el.removeEventListener(callback_event, el[context].removeHandle, false)
       el[context] = null
       delete el[context]
