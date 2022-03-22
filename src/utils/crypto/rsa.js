@@ -1,25 +1,28 @@
 import JsEncrypt from 'jsencrypt'
-import {
-  currentRSAKey
-} from '@/api/common/static'
 const prefix = '-----BEGIN PUBLIC KEY-----'
 const append = '-----END PUBLIC KEY-----'
 let key
 let rsaDate = new Date()
 
-async function getKey() {
+async function getKey () {
   if (key && new Date() - rsaDate < 600 * 1000) return key
-  const data = await currentRSAKey()
+  const data = {
+    model: `-----BEGIN PUBLIC KEY-----
+MDwwDQYJKoZIhvcNAQEBBQADKwAwKAIhAMAzLFxkrkcYL2wch21CM2kQVFpY9+7+
+/AvKr1rzQczdAgMBAAE=
+-----END PUBLIC KEY-----`
+  }
   key = data.model
   rsaDate = new Date()
   return key
 }
 
-async function encrypt(raw) {
+async function encrypt (raw, method = 'encrypt') {
+  debugger
   await getKey()
   const jse = new JsEncrypt()
   jse.setPublicKey(`${prefix}${key}${append}`)
-  const password = jse.encrypt(raw)
+  const password = jse[method](raw)
   return password
 }
 
