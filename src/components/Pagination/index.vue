@@ -17,22 +17,12 @@
 
 <script>
 import { scrollTo } from '@/utils/scroll-to'
-const default_setting = () => ({ pageIndex: 1, pageSize: 10, totalCount: 0 })
+
 export default {
   name: 'Pagination',
   props: {
-    pagesetting: {
-      required: true,
-      type: Object,
-      default() {
-        return this.innerPages
-      }
-    },
-    pageSizes: {
-      type: Array,
-      default() {
-        return [5, 10, 20, 30, 50, 100]
-      }
+    pagesetting: { required: true, type: Object, default: () => this.innerPages },
+    pageSizes: { type: Array, default() { return [5, 10, 20, 30, 50, 100] }
     },
     totalCount: { type: Number, default: 0 },
     layout: {
@@ -44,24 +34,37 @@ export default {
     hidden: { type: Boolean, default: false },
     small: { type: Boolean, default: false }
   },
-  data: () => ({ innerPages: default_setting() }),
+  data() {
+    return {
+      innerPages: { pageIndex: 1, pageSize: 10, totalCount: 0 }
+    }
+  },
   watch: {
     pagesetting: {
       handler(val) {
-        if (!val)val = default_setting()
-        this.innerPages.pageIndex = (val.pageIndex || 0) + 1
-        this.innerPages.pageSize = val.pageSize || 10
+        const p = this.innerPages
+        p.pageIndex = val.pageIndex + 1
+        p.pageSize = val.pageSize
+        this.checkTotalCount()
       },
       deep: true,
       immediate: true
+    },
+    totalCount: {
+      handler(val) {
+        this.checkTotalCount()
+      },
+      immediate: true
     }
   },
-  mounted() {
-    setTimeout(() => {
-      this.handleChange()
-    })
-  },
   methods: {
+    checkTotalCount() {
+      const p = this.innerPages
+      if ((p.pageIndex - 1) * p.pageSize > this.totalCount) {
+        p.pageIndex = Math.ceil(this.totalCount / p.pageSize)
+        this.handleChange()
+      }
+    },
     handleSizeChange(val) {
       this.innerPages.pageSize = val
       this.handleChange()
